@@ -1,15 +1,33 @@
-// swift-tools-version: 6.2
-// The swift-tools-version declares the minimum version of Swift required to build this package.
+// swift-tools-version: 6.0
 
 import PackageDescription
 
 let package = Package(
-    name: "download-organizer",
+    name: "DownloadOrganizer",
+    platforms: [
+        .macOS(.v14)
+    ],
+    products: [
+        .executable(
+            name: "download-organizer",
+            targets: ["DownloadOrganizer"]
+        )
+    ],
     targets: [
-        // Targets are the basic building blocks of a package, defining a module or a test suite.
-        // Targets can depend on other targets in this package and products from dependencies.
         .executableTarget(
-            name: "download-organizer"
+            name: "DownloadOrganizer",
+            path: "Sources",
+            linkerSettings: [
+                .linkedLibrary("sqlite3")
+            ]
         ),
+        .testTarget(
+            name: "DownloadOrganizerTests",
+            dependencies: ["DownloadOrganizer"],
+            path: "Tests/DownloadOrganizerTests",
+            linkerSettings: [
+                .linkedLibrary("sqlite3")
+            ]
+        )
     ]
 )
