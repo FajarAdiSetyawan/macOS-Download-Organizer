@@ -1,0 +1,24 @@
+{
+  "configurations": [
+    {
+      "type": "swift",
+      "request": "launch",
+      "args": [],
+      "cwd": "${workspaceFolder:download-organizer}",
+      "name": "Debug download-organizer",
+      "target": "download-organizer",
+      "configuration": "debug",
+      "preLaunchTask": "swift: Build Debug download-organizer"
+    },
+    {
+      "type": "swift",
+      "request": "launch",
+      "args": [],
+      "cwd": "${workspaceFolder:download-organizer}",
+      "name": "Release download-organizer",
+      "target": "download-organizer",
+      "configuration": "release",
+      "preLaunchTask": "swift: Build Release download-organizer"
+    }
+  ]
+}
