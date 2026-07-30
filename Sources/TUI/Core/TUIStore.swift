@@ -285,18 +285,20 @@ public final class TUIStore: ObservableObject, @unchecked Sendable {
     }
 
     public func detailedStatistics() async -> [CatStat] {
-        let cats = await RuleEngine.shared.allCategories()
+        let ruleCats = await RuleEngine.shared.allCategories()
         let records = allRecords
         var counts: [String: Int] = [:]
         var sizes: [String: Int64] = [:]
+        var recordCats = Set<String>()
         for r in records where r.status == "moved" {
             counts[r.category, default: 0] += 1
             sizes[r.category, default: 0] += r.fileSize
+            recordCats.insert(r.category)
         }
-        return cats.map { cat in
+        let allCats = Array(Set(ruleCats).union(recordCats)).sorted()
+        return allCats.map { cat in
             CatStat(category: cat, count: counts[cat] ?? 0, totalSize: sizes[cat] ?? 0)
         }
-        .filter { $0.count > 0 || $0.category == "Others" }
     }
 
     public func addCustomRule(category: String, extensions: String) async {

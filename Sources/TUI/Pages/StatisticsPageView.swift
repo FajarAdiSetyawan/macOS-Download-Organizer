@@ -54,22 +54,7 @@ public struct StatisticsPageView: View {
                                     Divider()
                                         .foregroundColor(theme.border)
                                 }
-                                HStack(spacing: 1) {
-                                    Text("  Total")
-                                        .foregroundColor(theme.textDim)
-                                        .bold()
-                                    Spacer()
-                                    if totalSize > 0 {
-                                        Text(formatByte(totalSize))
-                                            .foregroundColor(theme.primary)
-                                            .bold()
-                                    }
-                                    Text("\(totalFiles)")
-                                        .foregroundColor(theme.highlight)
-                                        .bold()
-                                }
-                                .padding(.horizontal)
-                                .padding(.vertical, 1)
+
                             }
                         }
                     }
