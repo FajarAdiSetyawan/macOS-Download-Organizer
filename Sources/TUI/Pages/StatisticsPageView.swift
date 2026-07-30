@@ -28,17 +28,22 @@ public struct StatisticsPageView: View {
 
                     sectionTitle("Per Folder", theme: theme)
 
-                    if catStats.isEmpty {
-                        emptyState("No data yet.", theme: theme)
-                    } else {
-                        ScrollView {
-                            VStack(alignment: .leading, spacing: 0) {
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 0) {
+                            if catStats.isEmpty {
+                                HStack {
+                                    Spacer()
+                                    Text("No data yet.")
+                                        .foregroundColor(theme.textDim)
+                                    Spacer()
+                                }
+                                .padding(.vertical, 2)
+                            } else {
                                 ForEach(Array(catStats.enumerated()), id: \.offset) { _, cs in
                                     folderRow(cs: cs, maxCount: maxCount, theme: theme)
                                     Divider()
                                         .foregroundColor(theme.border)
                                 }
-
                             }
                         }
                     }
