@@ -10,7 +10,7 @@ Built with **Swift 6**, powered by **SwiftTUI** and **LaunchAgent**.
 ![Swift](https://img.shields.io/badge/Swift-6.0-orange?style=for-the-badge\&logo=swift)
 ![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
 ![Platform](https://img.shields.io/badge/Platform-macOS-lightgrey?style=for-the-badge)
-![Version](https://img.shields.io/badge/Version-1.1.0-red?style=for-the-badge)
+![Version](https://img.shields.io/badge/Version-1.1.1-red?style=for-the-badge)
 
 </div>
 

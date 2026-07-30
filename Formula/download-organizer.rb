@@ -1,10 +1,10 @@
 class DownloadOrganizer < Formula
   desc "Automatically organize your Downloads folder by file type"
   homepage "https://github.com/fajaradisetyawan/download-organizer"
-  url "https://github.com/fajaradisetyawan/download-organizer/archive/refs/tags/v1.1.0.tar.gz"
-  sha256 "b66efa3d854ac9c34edef4392bd579504426522387a0d2883a835fe8882a7fd9"
+  url "https://github.com/fajaradisetyawan/download-organizer/archive/refs/tags/v1.1.1.tar.gz"
+  sha256 "PLACEHOLDER"
   license "MIT"
-  version "1.1.0"
+  version "1.1.1"
 
   depends_on xcode: ["14.0", :build]
   depends_on :macos => :sonoma

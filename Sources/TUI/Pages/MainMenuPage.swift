@@ -19,7 +19,7 @@ public struct MainMenuPage: View {
         VStack(spacing: 0) {
             VStack(spacing: 0) {
                 logoView(asciiLogo, theme: theme)
-                Text("Download Organizer  v1.1.0")
+                Text("Download Organizer  v1.1.1")
                     .foregroundColor(theme.highlight)
                     .bold()
                 Text("Native Swift 6  •  macOS 14+")
