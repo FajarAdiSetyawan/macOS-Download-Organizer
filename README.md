@@ -207,53 +207,7 @@ chmod +x install.sh
 | 🔐 Certificates | cer, crt, pem, key, p12, pfx, der, csr                                        |
 | ❓ Others       | Any unsupported extension                                                        |
 
----
 
-# ⚙ Configuration
-
-All configuration files are stored inside:
-
-```text
-~/.download-organizer/
-```
-
-## config.json
-
-Example:
-
-```json
-{
-  "enabled": true,
-  "watchFolder": "~/Downloads",
-  "delay": 3,
-  "notifications": false,
-  "autoCreateFolders": true,
-  "duplicateStrategy": "rename",
-  "history": true
-}
-```
-
----
-
-## rules.json
-
-Create custom rules to override the default categorization.
-
-Format: `{ "CategoryName": ["ext1", "ext2", ...] }`
-
-Example:
-
-```json
-{
-  "Design": ["psd", "ai", "fig", "xd", "sketch"],
-  "Installers": ["dmg", "pkg", "exe", "msi", "deb", "rpm"],
-  "Subtitles": ["srt", "sub", "ass", "ssa", "vtt"]
-}
-```
-
-Changes are detected automatically without restarting the service.
-
----
 
 # 🧩 Project Structure
 
