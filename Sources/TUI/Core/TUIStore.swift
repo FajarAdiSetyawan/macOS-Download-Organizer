@@ -41,6 +41,7 @@ public final class TUIStore: ObservableObject, @unchecked Sendable {
             let config = await ConfigurationManager.shared.current()
             configuration = config
             ThemeManager.activate(config.theme)
+            await NotificationService.shared.requestPermission()
             await HistoryService.shared.start()
             await RuleEngine.shared.reloadRules()
         } catch {}
