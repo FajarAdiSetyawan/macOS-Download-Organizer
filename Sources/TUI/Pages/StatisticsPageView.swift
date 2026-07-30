@@ -15,37 +15,26 @@ public struct StatisticsPageView: View {
         let stats = store.statistics
         let totalCount = stats.values.reduce(0, +)
         let sorted = stats.sorted { $0.value > $1.value }
+        let maxCount = sorted.first?.value ?? 1
 
         if showHelp {
             helpOverlay(theme: theme, onClose: { showHelp = false })
         } else {
             VStack(alignment: .leading, spacing: 0) {
-            pageTitle("\(TUIIcon.stats) Statistics", theme: theme)
+                pageTitle("\(TUIIcon.stats) Statistics", theme: theme)
 
-            Divider()
-                .foregroundColor(theme.border)
+                Divider()
+                    .foregroundColor(theme.border)
 
-            VStack(alignment: .leading, spacing: 0) {
                 sectionTitle("Overview", theme: theme)
 
                 HStack(spacing: 4) {
-                    metricCard(
-                        "Total Files",
-                        "\(totalCount)",
-                        theme: theme
-                    )
-                    metricCard(
-                        "Categories",
-                        "\(sorted.count)",
-                        theme: theme
-                    )
-                    metricCard(
-                        "Today",
-                        "\(store.movedToday)",
-                        theme: theme
-                    )
+                    statBox("\(totalCount)", "Total Files", color: theme.highlight, theme: theme)
+                    statBox("\(sorted.count)", "Categories", color: theme.accent, theme: theme)
+                    statBox("\(store.movedToday)", "Today", color: theme.success, theme: theme)
                 }
                 .padding(.horizontal)
+                .padding(.vertical, 1)
 
                 Divider()
                     .foregroundColor(theme.border)
@@ -55,83 +44,104 @@ public struct StatisticsPageView: View {
                 if sorted.isEmpty {
                     emptyState("No statistics yet.", theme: theme)
                 } else {
-                    let maxCount = sorted.first?.value ?? 1
                     ScrollView {
-                            VStack(alignment: .leading, spacing: 0) {
+                        VStack(alignment: .leading, spacing: 0) {
                             ForEach(sorted, id: \.0) { category, count in
-                                categoryBar(
+                                categoryRow(
                                     category: category,
                                     count: count,
                                     maxCount: maxCount,
                                     totalCount: totalCount,
                                     theme: theme
                                 )
+                                Divider()
+                                    .foregroundColor(theme.border)
                             }
+                            HStack(spacing: 1) {
+                                Text("  Total")
+                                    .foregroundColor(theme.textDim)
+                                    .bold()
+                                Spacer()
+                                Text("\(totalCount)")
+                                    .foregroundColor(theme.highlight)
+                                    .bold()
+                                Text("(100%)")
+                                    .foregroundColor(theme.textDim)
+                            }
+                            .padding(.horizontal)
+                            .padding(.vertical, 1)
                         }
                     }
                 }
-            }
 
-            Spacer()
-
-            Divider()
-                .foregroundColor(theme.border)
-
-            HStack(spacing: 2) {
-                keyHint("R", "Refresh", theme: theme)
                 Spacer()
-                helpButton(theme: theme, action: { showHelp = true })
-                themeButton(theme: theme)
-                homeButton(theme: theme, action: onHome)
+
+                Divider()
+                    .foregroundColor(theme.border)
+
+                HStack(spacing: 2) {
+                    keyHint("R", "Refresh", theme: theme)
+                    Spacer()
+                    helpButton(theme: theme, action: { showHelp = true })
+                    themeButton(theme: theme)
+                    homeButton(theme: theme, action: onHome)
+                }
+                .padding(.horizontal)
             }
-            .padding(.horizontal)
-        }
         }
     }
 
-    private func metricCard(_ label: String, _ value: String, theme: ThemeColors) -> some View {
+    private func statBox(_ value: String, _ label: String, color: Color, theme: ThemeColors) -> some View {
         VStack(alignment: .center, spacing: 0) {
             Text(value)
-                .foregroundColor(theme.highlight)
+                .foregroundColor(color)
                 .bold()
             Text(label)
                 .foregroundColor(theme.textDim)
         }
-        .padding(.horizontal, 2)
+        .frame(minWidth: 10)
+        .padding(.horizontal, 3)
         .padding(.vertical, 1)
         .border(theme.border)
     }
 
-    private func categoryBar(
+    private func categoryRow(
         category: String,
         count: Int,
         maxCount: Int,
         totalCount: Int,
         theme: ThemeColors
     ) -> some View {
-        let barWidth = max(
-            Double(count) / Double(maxCount) * 40,
-            1
-        )
-        let bar = String(repeating: TUIIcon.bar, count: Int(barWidth))
+        let pct = totalCount > 0 ? 100 * count / totalCount : 0
+        let barLen = max(Double(count) / Double(maxCount) * 30, 1)
+        let bar = String(repeating: TUIIcon.bar, count: Int(barLen))
+        let barColor: Color = {
+            switch pct {
+            case 0..<5: return theme.textDim
+            case 5..<15: return theme.primary
+            case 15..<30: return theme.accent
+            default: return theme.success
+            }
+        }()
 
         return VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: 1) {
                 Text("  \(category)")
                     .foregroundColor(theme.textDim)
                 Spacer()
+                if pct > 0 {
+                    Text("\(pct)%")
+                        .foregroundColor(barColor)
+                        .bold()
+                }
                 Text("\(count)")
                     .foregroundColor(theme.highlight)
                     .bold()
-                if totalCount > 0 {
-                    Text("(\(100 * count / totalCount)%)")
-                        .foregroundColor(theme.textDim)
-                }
             }
             .padding(.horizontal)
 
             Text("    \(bar)")
-                .foregroundColor(theme.accent)
+                .foregroundColor(barColor)
                 .padding(.horizontal)
         }
         .padding(.vertical, 1)
