@@ -7,14 +7,13 @@ public struct DashboardRootView: View {
     public init() {}
 
     public var body: some View {
-        VStack(spacing: 0) {
+        Group {
             if let page = activePage {
                 pageView(page)
             } else {
                 MainMenuPage(onSelect: { page in activePage = page })
             }
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .onAppear {
             Task { @MainActor in
                 await TUIStore.shared.bootstrap()
