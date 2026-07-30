@@ -4,13 +4,13 @@
 
 **Automatically organize your macOS Downloads folder in real-time.**
 
-Built with **Swift 6**, powered by **LaunchAgent**, and designed to work silently in the background.
+Built with **Swift 6**, powered by **SwiftTUI** and **LaunchAgent**.
 
 ![macOS](https://img.shields.io/badge/macOS-14%2B-blue?style=for-the-badge\&logo=apple)
 ![Swift](https://img.shields.io/badge/Swift-6.0-orange?style=for-the-badge\&logo=swift)
 ![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
 ![Platform](https://img.shields.io/badge/Platform-macOS-lightgrey?style=for-the-badge)
-![SPM](https://img.shields.io/badge/Swift_Package_Manager-Compatible-red?style=for-the-badge)
+![Version](https://img.shields.io/badge/Version-1.1.0-red?style=for-the-badge)
 
 </div>
 
@@ -18,36 +18,42 @@ Built with **Swift 6**, powered by **LaunchAgent**, and designed to work silentl
 
 ## ✨ Overview
 
-**Download Organizer** is a lightweight background service for macOS that automatically keeps your **Downloads** folder clean and organized.
+**Download Organizer** is a native macOS tool that keeps your **Downloads** folder clean and organized. It features a **Terminal User Interface (TUI)** for interactive management alongside a background service.
 
-Instead of manually sorting downloaded files, Download Organizer watches your `~/Downloads` directory in real-time and automatically moves completed downloads into categorized folders such as:
-
-* 📷 Images
-* 🎥 Videos
-* 📄 Documents
-* 📕 PDF
-* 🎵 Audio
-* 💻 Code
-* 📦 Archives
-* and many more...
-
-The application is written entirely in **Swift 6**, uses **FSEvents** for real-time monitoring, stores history in **SQLite**, and runs silently as a **LaunchAgent**.
+Instead of manually sorting files, it watches your `~/Downloads` directory in real-time and automatically moves completed downloads into categorized folders.
 
 ---
 
 # 🚀 Features
 
+### Core
 * ⚡ Real-time monitoring using **FSEvents**
-* 📂 Automatically categorizes downloaded files
+* 📂 Automatically categorizes downloaded files into 15+ categories
 * ⏳ Waits until downloads are fully completed before moving
-* 🔄 Prevents filename collisions with automatic renaming
-* 🗄 Stores complete move history in SQLite
-* ♻ Undo the most recent move
-* 📊 View organizer statistics
-* 🔥 Hot-reloads custom rules without restarting
-* ⚙ Configurable via JSON
-* 📝 Detailed logging
+* 🔄 Handles filename collisions with configurable strategy (rename/overwrite/skip)
+* 🗄 Stores complete move history in **SQLite**
+* 📝 Detailed file logging
+
+### Terminal UI (TUI)
+* 🖥️ Interactive dashboard with real-time status
+* 📊 History viewer with filter (All/Moved/Restored/Failed) and sort (Date/Name/Size)
+* 📈 Statistics page with per-category breakdown
+* ⚙ Configuration editor with inline editing and duplicate strategy selector
+* 📋 Rules manager with add/remove/reset and confirmation dialogs
+* 🔮 Rule simulator - test any filename against current rules
+* 📜 Log viewer
+* 🩺 Doctor page for system diagnostics
+* ♻ Undo last move or **bulk undo** multiple moves at once
+* 🏃 Organize Now - immediately scan and organize
+* 🔄 Auto-refresh toggle
+* 🎨 5 built-in themes (dark, light, nord, gruvbox, dracula)
+* ❓ Help overlay with keyboard shortcuts on every page
+* 💾 Export/import configuration
+* 📦 Backup/restore all data (config + rules)
+
+### Service
 * 🚀 Lightweight background LaunchAgent
+* 🔥 Hot-reloads custom rules without restarting
 * 🍺 Easy installation via Homebrew
 * 🔒 No internet connection required
 * ❤️ Built with native Swift
@@ -75,13 +81,87 @@ brew trust fajaradisetyawan/tap
 brew install download-organizer
 ```
 
-After installation:
+---
+
+# 🖥️ Terminal UI
+
+Run the interactive dashboard:
+
+```bash
+download-organizer dashboard
+```
+
+Or using the flag form:
+
+```bash
+download-organizer --dashboard
+```
+
+Navigate with arrow keys, press **Enter** to select, and use the on-screen key hints for each page. Press **?** on any page for the full keyboard shortcut reference.
+
+---
+
+# 📖 CLI Usage
+
+## Run as background service
+
+```bash
+download-organizer
+```
+
+## Install LaunchAgent
 
 ```bash
 download-organizer-install
 ```
 
-Verify the service:
+## Restart Service
+
+```bash
+download-organizer-restart
+```
+
+## Remove Service
+
+```bash
+download-organizer-uninstall
+```
+
+## View Statistics
+
+```bash
+download-organizer --stats
+```
+
+## Undo Last Move
+
+```bash
+download-organizer --undo-last
+```
+
+## Doctor Checks
+
+```bash
+download-organizer doctor
+download-organizer --doctor
+```
+
+## View History
+
+```bash
+download-organizer history --limit 20
+download-organizer history --today
+download-organizer history --category PDF
+download-organizer history --extension pdf
+```
+
+## View Logs
+
+```bash
+tail -f ~/.download-organizer/logs/download-organizer.log
+```
+
+## Check Service Status
 
 ```bash
 launchctl print gui/$(id -u)/com.downloadorganizer.agent
@@ -109,19 +189,23 @@ chmod +x install.sh
 
 # 📁 Default Folder Categories
 
-| Category       | Extensions                                                         |
-| -------------- | ------------------------------------------------------------------ |
-| 📷 Images      | jpg, jpeg, png, gif, webp, heic, svg, bmp, tif                     |
-| 🎥 Videos      | mp4, mov, mkv, avi, m4v, webm                                      |
-| 🎵 Audio       | mp3, wav, m4a, aac, flac, ogg                                      |
-| 📄 Documents   | doc, docx, xls, xlsx, ppt, pptx, txt, csv                          |
-| 📕 PDF         | pdf                                                                |
-| 📦 Archives    | zip, rar, 7z, tar, gz                                              |
-| 💻 Code        | swift, dart, js, ts, json, xml, html, css, py, java, kt, c, cpp, h |
-| 💾 Disk Images | dmg, iso                                                           |
-| 📱 Apps        | app, pkg                                                           |
-| 📚 eBooks      | epub, mobi, azw3                                                   |
-| ❓ Others       | Any unsupported extension                                          |
+| Category       | Extensions (selected)                                                            |
+| -------------- | -------------------------------------------------------------------------------- |
+| 📷 Images      | jpg, jpeg, png, gif, webp, svg, heic, bmp, tif, raw, jxl, xcf                   |
+| 🎥 Videos      | mp4, mov, mkv, avi, webm, m4v, mpg, mpeg, 3gp, ogv, vob, ts                     |
+| 🎵 Audio       | mp3, wav, m4a, aac, flac, ogg, wma, opus, alac, aiff, mid                       |
+| 📄 Documents   | doc, docx, xls, xlsx, ppt, pptx, txt, csv, rtf, odt, md, log, msg, eml          |
+| 📕 PDF         | pdf                                                                              |
+| 📦 Archives    | zip, rar, 7z, tar, gz, xz, bz2, dmg, iso, jar, war, zst, lz4                   |
+| 💻 Code        | swift, dart, js, ts, py, java, kt, go, rs, c, cpp, h, zig, hs, ex, lua, sh, rb |
+| 🎨 Design      | fig, xd, psd, ai, sketch, eps, ps, storyboard, xib, blend, c4d, max             |
+| 📱 Apps        | app, pkg, exe, msi, apk, ipa, deb, rpm, appimage                                |
+| 📚 eBooks      | epub, mobi, azw, azw3, fb2, lit, lrf, cbr, cbz                                  |
+| 🔤 Fonts       | ttf, otf, woff, woff2, eot, dfont, fon, ttc                                     |
+| 🗄 Database    | sqlite, sqlite3, db, db3, sql, frm, myd, myi                                    |
+| ⚙ Config      | plist, strings, xcconfig, entitlements, mobileprovision, pbxproj                |
+| 🔐 Certificates | cer, crt, pem, key, p12, pfx, der, csr                                        |
+| ❓ Others       | Any unsupported extension                                                        |
 
 ---
 
@@ -139,11 +223,13 @@ Example:
 
 ```json
 {
-  "watchDirectory": "~/Downloads",
-  "enableLogging": true,
-  "waitUntilStable": true,
-  "stableCheckSeconds": 3,
-  "duplicateStrategy": "rename"
+  "enabled": true,
+  "watchFolder": "~/Downloads",
+  "delay": 3,
+  "notifications": false,
+  "autoCreateFolders": true,
+  "duplicateStrategy": "rename",
+  "history": true
 }
 ```
 
@@ -153,85 +239,19 @@ Example:
 
 Create custom rules to override the default categorization.
 
+Format: `{ "CategoryName": ["ext1", "ext2", ...] }`
+
 Example:
 
 ```json
-[
-  {
-    "extensions": [
-      "psd",
-      "ai"
-    ],
-    "folder": "Design"
-  },
-  {
-    "extensions": [
-      "fig"
-    ],
-    "folder": "Figma"
-  }
-]
+{
+  "Design": ["psd", "ai", "fig", "xd", "sketch"],
+  "Installers": ["dmg", "pkg", "exe", "msi", "deb", "rpm"],
+  "Subtitles": ["srt", "sub", "ass", "ssa", "vtt"]
+}
 ```
 
 Changes are detected automatically without restarting the service.
-
----
-
-# 📖 Usage
-
-## Install LaunchAgent
-
-```bash
-download-organizer-install
-```
-
----
-
-## Restart Service
-
-```bash
-download-organizer-restart
-```
-
----
-
-## Remove Service
-
-```bash
-download-organizer-uninstall
-```
-
----
-
-## View Statistics
-
-```bash
-download-organizer --stats
-```
-
----
-
-## Undo Last Move
-
-```bash
-download-organizer --undo-last
-```
-
----
-
-## View Logs
-
-```bash
-tail -f ~/.download-organizer/logs/download-organizer.log
-```
-
----
-
-## Check Service Status
-
-```bash
-launchctl print gui/$(id -u)/com.downloadorganizer.agent
-```
 
 ---
 
@@ -240,14 +260,23 @@ launchctl print gui/$(id -u)/com.downloadorganizer.agent
 ```
 macOS-Download-Organizer
 ├── Sources/
-│   ├── CLI
-│   ├── Monitor
-│   ├── SQLite
-│   ├── Models
-│   ├── Utils
-│   └── Commands
+│   ├── App/                  # Entry point
+│   ├── TUI/                  # Terminal UI (SwiftTUI)
+│   │   ├── Core/             # Navigation, store, themes
+│   │   ├── Pages/            # All page views
+│   │   └── Views/            # Reusable components
+│   ├── Services/             # Business logic
+│   │   ├── RuleEngine/       # File categorization
+│   │   ├── FileMover/        # File operations
+│   │   ├── FileWatcher/      # FSEvents monitoring
+│   │   └── HistoryService/   # SQLite history
+│   ├── Database/             # SQLite layer
+│   ├── Models/               # Data models
+│   └── Core/                 # Configuration, logging, paths
+├── Formula/                  # Homebrew formula
 ├── install.sh
 ├── uninstall.sh
+├── restart.sh
 ├── Package.swift
 └── README.md
 ```
@@ -269,13 +298,13 @@ Downloads Folder
  Detect file extension
         │
         ▼
- Load custom rules
+ Load custom rules (rules.json)
         │
         ▼
  Determine destination folder
         │
         ▼
- Handle duplicates
+ Handle duplicates (rename/overwrite/skip)
         │
         ▼
  Move file
@@ -293,23 +322,11 @@ Downloads Folder
 
 ## "File is not stable"
 
-Some browsers write files in multiple stages.
-
-The organizer waits until the file size no longer changes before moving it.
-
-If necessary, increase:
-
-```json
-stableCheckSeconds
-```
-
-inside `config.json`.
-
----
+Some browsers write files in multiple stages. The organizer waits until the file size no longer changes before moving it. If necessary, increase `delay` in `config.json`.
 
 ## Permission Denied
 
-Grant **Full Disk Access** to the terminal (or the app running the service):
+Grant **Full Disk Access** to the terminal:
 
 **System Settings → Privacy & Security → Full Disk Access**
 
@@ -319,8 +336,6 @@ Then restart:
 download-organizer-restart
 ```
 
----
-
 ## Service Not Running
 
 Check LaunchAgent:
@@ -329,7 +344,7 @@ Check LaunchAgent:
 launchctl print gui/$(id -u)/com.downloadorganizer.agent
 ```
 
-Reinstall:
+Reinstall if needed:
 
 ```bash
 download-organizer-install
@@ -337,31 +352,17 @@ download-organizer-install
 
 ---
 
-## View Logs
-
-```bash
-tail -f ~/.download-organizer/logs/download-organizer.log
-```
-
----
-
 # 🗄 Database
 
-Move history is stored locally in SQLite.
-
-Location:
-
-```text
-~/.download-organizer/history.db
-```
+Move history is stored locally in **SQLite** at `~/.download-organizer/history.db`.
 
 Each move records:
-
-* Original filename
-* New filename
-* Source path
-* Destination path
+* Filename
+* Source path → Destination path
+* Category and file extension
+* File size
 * Timestamp
+* Status (moved / restored / failed)
 
 ---
 
@@ -379,8 +380,6 @@ Contributions are welcome!
 # 📄 License
 
 This project is licensed under the **MIT License**.
-
-Feel free to use, modify, and distribute it in accordance with the license terms.
 
 ---
 
