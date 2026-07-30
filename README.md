@@ -83,9 +83,11 @@ brew install download-organizer
 
 ---
 
-# 🖥️ Terminal UI
+# 🖥️ Terminal UI (TUI)
 
-Run the interactive dashboard:
+Download Organizer includes a full interactive **Terminal User Interface** built with SwiftTUI.
+
+## Launch
 
 ```bash
 download-organizer dashboard
@@ -97,7 +99,67 @@ Or using the flag form:
 download-organizer --dashboard
 ```
 
-Navigate with arrow keys, press **Enter** to select, and use the on-screen key hints for each page. Press **?** on any page for the full keyboard shortcut reference.
+## Main Menu
+
+The main menu lists all available pages. Use **arrow keys** to navigate and **Enter** to select.
+
+Pages:
+| Menu          | Description                                        |
+|---------------|----------------------------------------------------|
+| Dashboard     | Real-time status, recent activity, quick actions   |
+| History       | Browse all moves, filter & sort, undo              |
+| Statistics    | Per-category file counts and breakdown             |
+| Configuration | Edit settings inline (watch folder, delay, etc.)   |
+| Rules         | View/add/edit/remove categorization rules          |
+| Simulator     | Test any filename against current rules            |
+| Logs          | View application logs                              |
+| Doctor        | Run system diagnostics checks                      |
+| About         | Version info and credits                           |
+
+## Navigation
+
+| Key                  | Action                     |
+|----------------------|----------------------------|
+| `↑` `↓`             | Move selection             |
+| `Enter`              | Select / confirm           |
+| `Esc`                | Cancel / go back           |
+| `R`                  | Refresh current page       |
+| `?`                  | Show help overlay          |
+| `T` (or theme btn)   | Cycle theme                |
+| `Q`                  | Quit                       |
+
+## Dashboard
+
+- **Status**: service running/stopped, watch folder, queue count
+- **Recent Activity**: last 10 moved files
+- **Quick Actions**: Undo last move, Organize Now, toggle auto-refresh
+- **Bottom bar**: theme button, help, home
+
+## History
+
+- **Filter**: All / Moved / Restored / Failed
+- **Sort**: Date / Name / Size
+- **Search**: type `/` to search filename, category, or extension
+- **Undo**: single undo, or use `-` / `+` to set bulk count then `Undo N`
+
+## Configuration
+
+- **Inline editing**: click any row to edit
+- **Watch Folder**: browse filesystem with FolderBrowserView
+- **Duplicate Strategy**: dropdown with rename / overwrite / skip
+- **Export / Import**: save config to Desktop, or restore from file
+- **Backup / Restore**: backup both config.json + rules.json to timestamped folder
+
+## Rules
+
+- **Add rule**: fill category name + extensions
+- **Edit**: click any category to modify extensions inline
+- **Remove**: confirm dialog before deleting
+- **Reset to defaults**: confirm dialog before clearing all custom rules
+
+## Simulator
+
+Type a filename (e.g. `photo.jpg` or `archive.zip`) and press **Enter** to see which category it would be classified under. Maintains a history of the last 20 tests.
 
 ---
 
