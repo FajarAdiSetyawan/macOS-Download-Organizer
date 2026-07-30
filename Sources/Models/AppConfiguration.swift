@@ -1,5 +1,27 @@
 import Foundation
 
+public enum DuplicateStrategy: String, Codable, CaseIterable, Sendable {
+    case rename
+    case overwrite
+    case skip
+
+    public var label: String {
+        switch self {
+        case .rename: return "Rename"
+        case .overwrite: return "Overwrite"
+        case .skip: return "Skip"
+        }
+    }
+
+    public var description: String {
+        switch self {
+        case .rename: return "Add (1), (2), ..."
+        case .overwrite: return "Replace existing"
+        case .skip: return "Leave existing"
+        }
+    }
+}
+
 public struct AppConfiguration: Codable, Sendable {
     public var enabled: Bool
     public var watchFolder: String
@@ -25,6 +47,10 @@ public struct AppConfiguration: Codable, Sendable {
         self.autoCreateFolders = autoCreateFolders
         self.duplicateStrategy = duplicateStrategy
         self.history = history
+    }
+
+    public var parsedDuplicateStrategy: DuplicateStrategy {
+        DuplicateStrategy(rawValue: duplicateStrategy) ?? .rename
     }
 
     public static let `default` = AppConfiguration(

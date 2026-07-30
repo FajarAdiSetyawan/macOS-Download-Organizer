@@ -2,17 +2,34 @@ import Foundation
 
 public enum DuplicateNameResolver {
 
-    /// Resolves a non-conflicting destination URL for the given source file
-    /// inside the target folder. If no conflict exists, returns the original
-    /// filename. If a conflict exists, appends an incrementing index.
-    ///
-    /// Example:
-    /// - photo.jpg        (exists)
-    /// - photo (1).jpg    (exists)
-    /// - photo (2).jpg    ← returned
     public static func destination(
         for source: URL,
-        in folder: URL
+        in folder: URL,
+        strategy: DuplicateStrategy = .rename
+    ) -> URL {
+        switch strategy {
+        case .overwrite:
+            return folder.appendingPathComponent(source.lastPathComponent)
+        case .skip:
+            return folder.appendingPathComponent(source.lastPathComponent)
+        case .rename:
+            return resolveRename(for: source, folder: folder)
+        }
+    }
+
+    public static func shouldSkip(
+        for source: URL,
+        in folder: URL,
+        strategy: DuplicateStrategy
+    ) -> Bool {
+        guard strategy == .skip else { return false }
+        let destination = folder.appendingPathComponent(source.lastPathComponent)
+        return FileManager.default.fileExists(atPath: destination.path)
+    }
+
+    private static func resolveRename(
+        for source: URL,
+        folder: URL
     ) -> URL {
         let manager = FileManager.default
         let filename = source.lastPathComponent
@@ -44,8 +61,6 @@ public enum DuplicateNameResolver {
         }
     }
 
-    /// Checks whether a file at the given URL would conflict with any
-    /// existing file in the destination folder.
     public static func hasConflict(
         for source: URL,
         in folder: URL
@@ -54,8 +69,6 @@ public enum DuplicateNameResolver {
         let destination = folder.appendingPathComponent(filename)
         return FileManager.default.fileExists(atPath: destination.path)
     }
-
-    // MARK: - Private
 
     private static func buildName(
         baseName: String,

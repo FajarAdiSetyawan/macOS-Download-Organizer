@@ -12,5 +12,8 @@ public enum FileCategory: String, Codable, CaseIterable, Sendable {
     case fonts = "Fonts"
     case code = "Code"
     case design = "Design"
+    case database = "Database"
+    case config = "Config"
+    case certificates = "Certificates"
     case others = "Others"
 }

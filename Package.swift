@@ -13,10 +13,22 @@ let package = Package(
             targets: ["DownloadOrganizer"]
         )
     ],
+    dependencies: [
+        .package(
+            url: "https://github.com/rensbreur/SwiftTUI.git",
+            branch: "main"
+        )
+    ],
     targets: [
         .executableTarget(
             name: "DownloadOrganizer",
+            dependencies: [
+                .product(name: "SwiftTUI", package: "SwiftTUI")
+            ],
             path: "Sources",
+            swiftSettings: [
+                .unsafeFlags(["-strict-concurrency=minimal"])
+            ],
             linkerSettings: [
                 .linkedLibrary("sqlite3")
             ]
