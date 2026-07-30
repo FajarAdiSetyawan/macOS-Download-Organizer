@@ -59,6 +59,46 @@ public actor HistoryService {
 
     // MARK: - Undo
 
+    public func undoLastMoves(count: Int) async -> Int {
+        guard isOpen else {
+            await AppLogger.shared.log(.warning, "History database is not open")
+            return 0
+        }
+
+        var undone = 0
+        do {
+            let records = try await database.lastMovedRecords(limit: count)
+            for record in records {
+                let source = URL(fileURLWithPath: record.destinationPath)
+                let originalDir = URL(fileURLWithPath: record.originalPath)
+                    .deletingLastPathComponent()
+
+                guard FileManager.default.fileExists(atPath: source.path) else {
+                    await AppLogger.shared.log(.warning, "Bulk undo: file no longer exists at \(source.path)")
+                    continue
+                }
+
+                try FileManager.default.createDirectory(
+                    at: originalDir,
+                    withIntermediateDirectories: true
+                )
+
+                let finalDestination = DuplicateNameResolver.destination(
+                    for: source,
+                    in: originalDir
+                )
+
+                try FileManager.default.moveItem(at: source, to: finalDestination)
+                try await database.markRestored(id: record.id)
+                undone += 1
+            }
+            await AppLogger.shared.log(.info, "Bulk undo completed: \(undone) file(s) restored")
+        } catch {
+            await AppLogger.shared.log(.error, "Bulk undo failed: \(error.localizedDescription)")
+        }
+        return undone
+    }
+
     public func undoLastMove() async {
         guard isOpen else {
             await AppLogger.shared.log(
@@ -166,6 +206,61 @@ public actor HistoryService {
                 "Failed to fetch records: \(error.localizedDescription)"
             )
             return []
+        }
+    }
+
+    public func movedTodayCount() async -> Int {
+        guard isOpen else {
+            return 0
+        }
+
+        do {
+            return try await database.movedTodayCount()
+        } catch {
+            await AppLogger.shared.log(
+                .error,
+                "Failed to fetch moved today count: \(error.localizedDescription)"
+            )
+            return 0
+        }
+    }
+
+    public func queryHistory(
+        limit: Int = 50,
+        todayOnly: Bool = false,
+        category: String? = nil,
+        fileExtension: String? = nil
+    ) async -> [MoveRecord] {
+        guard isOpen else {
+            return []
+        }
+
+        do {
+            return try await database.queryHistory(
+                limit: limit,
+                todayOnly: todayOnly,
+                category: category,
+                fileExtension: fileExtension
+            )
+        } catch {
+            await AppLogger.shared.log(
+                .error,
+                "Failed to query history: \(error.localizedDescription)"
+            )
+            return []
+        }
+    }
+
+    public func isDatabaseHealthy() async -> Bool {
+        guard isOpen else {
+            return false
+        }
+
+        do {
+            _ = try await database.totalMoved()
+            return true
+        } catch {
+            return false
         }
     }
 }

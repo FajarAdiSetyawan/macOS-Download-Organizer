@@ -2,10 +2,10 @@
 set -euo pipefail
 
 # Colors
-readonly RED='\033[0;31m'
-readonly GREEN='\033[0;32m'
-readonly YELLOW='\033[1;33m'
-readonly NC='\033[0m' # No Color
+readonly RED="$(printf '\033[0;31m')"
+readonly GREEN="$(printf '\033[0;32m')"
+readonly YELLOW="$(printf '\033[1;33m')"
+readonly NC="$(printf '\033[0m')" # No Color
 
 # Configuration
 readonly LABEL="com.downloadorganizer.agent"
@@ -13,15 +13,15 @@ readonly PLIST="$HOME/Library/LaunchAgents/$LABEL.plist"
 
 # Functions
 log_info() {
-    echo -e "${GREEN}[INFO]${NC} $1"
+    printf '%s\n' "${GREEN}[INFO]${NC} $1"
 }
 
 log_warning() {
-    echo -e "${YELLOW}[WARNING]${NC} $1"
+    printf '%s\n' "${YELLOW}[WARNING]${NC} $1"
 }
 
 log_error() {
-    echo -e "${RED}[ERROR]${NC} $1"
+    printf '%s\n' "${RED}[ERROR]${NC} $1"
 }
 
 check_plist() {

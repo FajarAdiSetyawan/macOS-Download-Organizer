@@ -108,8 +108,19 @@ public actor FileMover {
             throw NSError(domain: "FileMover", code: 1, userInfo: [NSLocalizedDescriptionKey: "Destination unavailable"])
         }
 
-        let destination = DuplicateNameResolver.destination(for: url, in: destinationFolder)
+        let strategy = config.parsedDuplicateStrategy
+
+        if DuplicateNameResolver.shouldSkip(for: url, in: destinationFolder, strategy: strategy) {
+            await AppLogger.shared.log(.info, "Skipped (duplicate): \(url.lastPathComponent)")
+            return
+        }
+
+        let destination = DuplicateNameResolver.destination(for: url, in: destinationFolder, strategy: strategy)
         let originalSize = FileUtilities.fileSize(url)
+
+        if strategy == .overwrite {
+            try? FileManager.default.removeItem(at: destination)
+        }
 
         try FileManager.default.moveItem(at: url, to: destination)
 
@@ -137,6 +148,33 @@ public actor FileMover {
 
         await AppLogger.shared.log(.info, "Moved: \(url.lastPathComponent) → \(categoryName)/")
     }
+
+    public func organizeFolder(at url: URL) async -> Int {
+        let fm = FileManager.default
+        guard let contents = try? fm.contentsOfDirectory(
+            at: url,
+            includingPropertiesForKeys: [.isRegularFileKey]
+        ) else { return 0 }
+
+        var count = 0
+        for fileURL in contents {
+            let isRegular = (try? fileURL.resourceValues(forKeys: [.isRegularFileKey]).isRegularFile) ?? false
+            guard isRegular, FileUtilities.isCandidateForMove(fileURL) else { continue }
+            await enqueue(fileURL)
+            count += 1
+        }
+        await AppLogger.shared.log(.info, "Organize now: \(count) files queued from \(url.path)")
+        return count
+    }
+
+    public func retryQueueCount() -> Int {
+        retryQueue.count
+    }
+
+    public func activeQueueCount() -> Int {
+        activeQueue.count
+    }
+    
 
     // MARK: - Retry
 

@@ -26,6 +26,12 @@ public actor SQLiteDatabase {
         try createSchema()
     }
 
+    public enum SQLiteBindValue: Sendable {
+        case text(String)
+        case double(Double)
+        case integer(Int64)
+    }
+
     public func close() {
         guard db != nil else { return }
         sqlite3_close(db)
@@ -127,6 +133,42 @@ public actor SQLiteDatabase {
 
     // MARK: - Queries
 
+    public func lastMovedRecords(limit: Int = 10) throws -> [MoveRecord] {
+        let sql = """
+            SELECT
+                id,
+                filename,
+                originalPath,
+                destinationPath,
+                category,
+                extension,
+                fileSize,
+                createdAt,
+                movedAt,
+                status
+            FROM history
+            WHERE status = 'moved'
+            ORDER BY movedAt DESC
+            LIMIT ?;
+            """
+
+        var statement: OpaquePointer?
+
+        guard sqlite3_prepare_v2(db, sql, -1, &statement, nil) == SQLITE_OK else {
+            throw makeError("Failed to prepare lastMovedRecords statement")
+        }
+
+        defer { sqlite3_finalize(statement) }
+
+        sqlite3_bind_int(statement, 1, Int32(limit))
+
+        var records: [MoveRecord] = []
+        while sqlite3_step(statement) == SQLITE_ROW {
+            records.append(readRecord(from: statement))
+        }
+        return records
+    }
+
     public func lastMovedRecord() throws -> MoveRecord? {
         let sql = """
             SELECT
@@ -161,6 +203,119 @@ public actor SQLiteDatabase {
         }
 
         return readRecord(from: statement)
+    }
+
+    public func movedTodayCount() throws -> Int {
+        let startOfDay = Calendar.current.startOfDay(for: Date()).timeIntervalSince1970
+
+        let sql = """
+            SELECT COUNT(*)
+            FROM history
+            WHERE status = 'moved'
+            AND movedAt >= ?;
+            """
+
+        var statement: OpaquePointer?
+
+        guard sqlite3_prepare_v2(db, sql, -1, &statement, nil) == SQLITE_OK else {
+            throw makeError("Failed to prepare movedTodayCount statement")
+        }
+
+        defer {
+            sqlite3_finalize(statement)
+        }
+
+        sqlite3_bind_double(statement, 1, startOfDay)
+
+        guard sqlite3_step(statement) == SQLITE_ROW else {
+            return 0
+        }
+
+        return Int(sqlite3_column_int(statement, 0))
+    }
+
+    public func queryHistory(
+        limit: Int,
+        todayOnly: Bool,
+        category: String?,
+        fileExtension: String?
+    ) throws -> [MoveRecord] {
+        var conditions: [String] = []
+        var bindings: [(index: Int32, value: SQLiteBindValue)] = []
+        var bindIndex: Int32 = 1
+
+        if todayOnly {
+            let startOfDay = Calendar.current
+                .startOfDay(for: Date())
+                .timeIntervalSince1970
+
+            conditions.append("movedAt >= ?")
+            bindings.append((index: bindIndex, value: .double(startOfDay)))
+            bindIndex += 1
+        }
+
+        if let category {
+            conditions.append("category = ?")
+            bindings.append((index: bindIndex, value: .text(category)))
+            bindIndex += 1
+        }
+
+        if let fileExtension {
+            conditions.append("extension = ?")
+            bindings.append((index: bindIndex, value: .text(fileExtension.lowercased())))
+            bindIndex += 1
+        }
+
+        let whereClause = conditions.isEmpty
+            ? ""
+            : "WHERE " + conditions.joined(separator: " AND ")
+
+        let sql = """
+            SELECT
+                id,
+                filename,
+                originalPath,
+                destinationPath,
+                category,
+                extension,
+                fileSize,
+                createdAt,
+                movedAt,
+                status
+            FROM history
+            \(whereClause)
+            ORDER BY movedAt DESC
+            LIMIT ?;
+            """
+
+        var statement: OpaquePointer?
+
+        guard sqlite3_prepare_v2(db, sql, -1, &statement, nil) == SQLITE_OK else {
+            throw makeError("Failed to prepare queryHistory statement")
+        }
+
+        defer { sqlite3_finalize(statement) }
+
+        for binding in bindings {
+            switch binding.value {
+            case .text(let value):
+                bindText(statement, index: binding.index, value: value)
+            case .double(let value):
+                sqlite3_bind_double(statement, binding.index, value)
+            case .integer(let value):
+                sqlite3_bind_int64(statement, binding.index, value)
+            }
+        }
+
+        sqlite3_bind_int(statement, bindIndex, Int32(limit))
+
+        var records: [MoveRecord] = []
+
+        while sqlite3_step(statement) == SQLITE_ROW {
+            records.append(readRecord(from: statement))
+        }
+
+        return records
     }
 
     public func allRecords(
