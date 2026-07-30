@@ -26,6 +26,37 @@ public struct StatisticsPageView: View {
                     Divider()
                         .foregroundColor(theme.border)
 
+                    sectionTitle("Top Categories", theme: theme)
+
+                    let topCategoriesList = Array(catStats.filter { $0.count > 0 }.sorted { $0.count > $1.count }.prefix(10))
+                    let maxCountInTop = topCategoriesList.map(\.count).max() ?? 1
+
+                    if topCategoriesList.isEmpty {
+                        HStack {
+                            Spacer()
+                            Text("No data yet.")
+                                .foregroundColor(theme.textDim)
+                            Spacer()
+                        }
+                        .padding(.vertical, 2)
+                    } else {
+                        VStack(alignment: .leading, spacing: 0) {
+                            ForEach(Array(topCategoriesList.enumerated()), id: \.offset) { index, categoryData in
+                                histogramRow(
+                                    rank: index + 1,
+                                    category: categoryData,
+                                    maxCount: maxCountInTop,
+                                    theme: theme
+                                )
+                            }
+                        }
+                        .padding(.horizontal)
+                        .padding(.vertical, 1)
+                    }
+
+                    Divider()
+                        .foregroundColor(theme.border)
+
                     sectionTitle("Per Folder", theme: theme)
 
                     ScrollView {
@@ -50,47 +81,49 @@ public struct StatisticsPageView: View {
 
                     Spacer()
 
-                    if confirmDelete {
-                        HStack(spacing: 2) {
-                            Text("Delete all history?")
-                                .foregroundColor(theme.warning)
-                            Button(action: {
-                                Task {
-                                    await store.deleteAllHistory()
-                                    confirmDelete = false
-                                    await loadStats()
+                    Group {
+                        if confirmDelete {
+                            HStack(spacing: 2) {
+                                Text("Delete all history?")
+                                    .foregroundColor(theme.warning)
+                                Button(action: {
+                                    Task {
+                                        await store.deleteAllHistory()
+                                        confirmDelete = false
+                                        await loadStats()
+                                    }
+                                }) {
+                                    Text("Yes")
+                                        .foregroundColor(theme.error)
+                                        .bold()
                                 }
-                            }) {
-                                Text("Yes")
+                                Button(action: { confirmDelete = false }) {
+                                    Text("No")
+                                        .foregroundColor(theme.textDim)
+                                }
+                                Spacer()
+                            }
+                            .padding(.horizontal)
+                            Divider()
+                                .foregroundColor(theme.border)
+                        }
+
+                        Divider()
+                            .foregroundColor(theme.border)
+
+                        HStack(spacing: 2) {
+                            keyHint("R", "Refresh", theme: theme)
+                            Button(action: { confirmDelete = true }) {
+                                Text("Clear")
                                     .foregroundColor(theme.error)
                                     .bold()
                             }
-                            Button(action: { confirmDelete = false }) {
-                                Text("No")
-                                    .foregroundColor(theme.textDim)
-                            }
                             Spacer()
+                            helpButton(theme: theme, action: { showHelp = true })
+                            homeButton(theme: theme, action: onHome)
                         }
                         .padding(.horizontal)
-                        Divider()
-                            .foregroundColor(theme.border)
                     }
-
-                    Divider()
-                        .foregroundColor(theme.border)
-
-                    HStack(spacing: 2) {
-                        keyHint("R", "Refresh", theme: theme)
-                        Button(action: { confirmDelete = true }) {
-                            Text("Clear")
-                                .foregroundColor(theme.error)
-                                .bold()
-                        }
-                        Spacer()
-                        helpButton(theme: theme, action: { showHelp = true })
-                        homeButton(theme: theme, action: onHome)
-                    }
-                    .padding(.horizontal)
                 }
             }
         }
@@ -99,6 +132,40 @@ public struct StatisticsPageView: View {
 
     private func loadStats() async {
         catStats = await store.detailedStatistics()
+    }
+
+    private func histogramRow(rank: Int, category: TUIStore.CatStat, maxCount: Int, theme: ThemeColors) -> some View {
+        let percentage = maxCount > 0 ? Double(category.count) / Double(maxCount) : 0
+        let barWidth = Int(percentage * 40)
+        let bar = String(repeating: "█", count: max(barWidth, 1))
+        
+        let barColor: Color = {
+            switch rank {
+            case 1: return theme.success
+            case 2: return theme.accent
+            case 3: return theme.primary
+            default: return theme.textDim
+            }
+        }()
+        
+        return VStack(alignment: .leading, spacing: 0) {
+            HStack(spacing: 1) {
+                Text("\(rank).")
+                    .foregroundColor(theme.textDim)
+                Text(category.category)
+                    .foregroundColor(theme.highlight)
+                    .bold(rank <= 3)
+                Spacer()
+                Text(formatByte(category.totalSize))
+                    .foregroundColor(theme.primary)
+                Text("\(category.count)")
+                    .foregroundColor(theme.accent)
+                    .bold()
+            }
+            Text(bar)
+                .foregroundColor(barColor)
+        }
+        .padding(.vertical, 1)
     }
 
     private func folderRow(cs: TUIStore.CatStat, maxCount: Int, theme: ThemeColors) -> some View {
