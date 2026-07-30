@@ -38,6 +38,9 @@ public final class TUIStore: ObservableObject, @unchecked Sendable {
     public func bootstrap() async {
         do {
             try await ConfigurationManager.shared.bootstrap()
+            let config = await ConfigurationManager.shared.current()
+            configuration = config
+            ThemeManager.activate(config.theme)
             await HistoryService.shared.start()
             await RuleEngine.shared.reloadRules()
         } catch {}
@@ -174,6 +177,19 @@ public final class TUIStore: ObservableObject, @unchecked Sendable {
         let all = DuplicateStrategy.allCases
         let next = all[(all.firstIndex(of: current) ?? 0 + 1) % all.count]
         await updateConfig("Duplicate Strategy", value: next.rawValue)
+    }
+
+    public func cycleTheme() async {
+        let themeNames = ["dark", "light", "nord", "gruvbox", "dracula"]
+        let currentTheme = configuration.theme
+        let currentIndex = themeNames.firstIndex(of: currentTheme) ?? 0
+        let nextTheme = themeNames[(currentIndex + 1) % themeNames.count]
+        
+        var updatedConfig = configuration
+        updatedConfig.theme = nextTheme
+        await saveConfiguration(updatedConfig)
+        
+        ThemeManager.activate(nextTheme)
     }
 
     public func exportConfig(to url: URL) async throws {
@@ -340,6 +356,7 @@ public final class TUIStore: ObservableObject, @unchecked Sendable {
             ConfigEntry(key: "Auto-create Folders", value: c.autoCreateFolders ? "on" : "off", type: "Bool"),
             ConfigEntry(key: "Duplicate Strategy", value: "\(strategy.label) (\(strategy.description))", type: "Select"),
             ConfigEntry(key: "History", value: c.history ? "enabled" : "disabled", type: "Bool"),
+            ConfigEntry(key: "Theme", value: c.theme, type: "Theme"),
         ]
     }
 

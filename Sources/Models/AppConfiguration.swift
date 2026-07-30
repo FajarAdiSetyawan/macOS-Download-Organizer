@@ -30,6 +30,7 @@ public struct AppConfiguration: Codable, Sendable {
     public var autoCreateFolders: Bool
     public var duplicateStrategy: String
     public var history: Bool
+    public var theme: String
 
     public init(
         enabled: Bool,
@@ -38,7 +39,8 @@ public struct AppConfiguration: Codable, Sendable {
         notifications: Bool,
         autoCreateFolders: Bool,
         duplicateStrategy: String,
-        history: Bool
+        history: Bool,
+        theme: String = "dark"
     ) {
         self.enabled = enabled
         self.watchFolder = watchFolder
@@ -47,6 +49,7 @@ public struct AppConfiguration: Codable, Sendable {
         self.autoCreateFolders = autoCreateFolders
         self.duplicateStrategy = duplicateStrategy
         self.history = history
+        self.theme = theme
     }
 
     public var parsedDuplicateStrategy: DuplicateStrategy {
@@ -60,6 +63,7 @@ public struct AppConfiguration: Codable, Sendable {
         notifications: true,
         autoCreateFolders: true,
         duplicateStrategy: "rename",
-        history: true
+        history: true,
+        theme: "dark"
     )
 }

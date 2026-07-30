@@ -213,6 +213,42 @@ public struct ConfigurationPageView: View {
                         }
                     }
                 }
+            } else if editingKey == entry.key && entry.type == "Theme" {
+                VStack(spacing: 0) {
+                    HStack(spacing: 1) {
+                        Text(entry.key)
+                            .foregroundColor(theme.textDim)
+                        Spacer()
+                        Text(entry.value)
+                            .foregroundColor(theme.accent)
+                            .bold()
+                    }
+                    .padding(.horizontal)
+                    .padding(.vertical, 1)
+                    ForEach(["dark", "light", "nord", "gruvbox", "dracula"], id: \.self) { themeName in
+                        Button(action: {
+                            Task {
+                                var updatedConfig = store.configuration
+                                updatedConfig.theme = themeName
+                                await store.saveConfiguration(updatedConfig)
+                                ThemeManager.activate(themeName)
+                            }
+                            editingKey = nil
+                            feedbackMessage = "Theme: \(themeName)"
+                        }) {
+                            HStack(spacing: 1) {
+                                Text("  ")
+                                Text(themeName == store.configuration.theme ? TUIIcon.circleFilled : TUIIcon.circleEmpty)
+                                    .foregroundColor(themeName == store.configuration.theme ? theme.accent : theme.textDim)
+                                Text(themeName.capitalized)
+                                    .foregroundColor(themeName == store.configuration.theme ? theme.highlight : theme.textDim)
+                                    .bold(themeName == store.configuration.theme)
+                                Spacer()
+                            }
+                            .padding(.horizontal)
+                        }
+                    }
+                }
             } else if editingKey == entry.key && entry.type == "String" {
                 HStack(spacing: 1) {
                     Text(entry.key)
@@ -247,6 +283,9 @@ public struct ConfigurationPageView: View {
                         if entry.type == "Select" {
                             Text(TUIIcon.refresh).foregroundColor(theme.primary)
                         }
+                        if entry.type == "Theme" {
+                            Text(TUIIcon.refresh).foregroundColor(theme.primary)
+                        }
                     }
                     .padding(.horizontal)
                     .padding(.vertical, 1)
@@ -258,7 +297,7 @@ public struct ConfigurationPageView: View {
     private func edit(_ entry: ConfigEntry) {
         if entry.type == "Bool" {
             Task { await store.toggleConfig(entry.key) }
-        } else if entry.type == "Select" || entry.type == "Seconds" || entry.type == "String" {
+        } else if entry.type == "Select" || entry.type == "Theme" || entry.type == "Seconds" || entry.type == "String" {
             editingKey = editingKey == entry.key ? nil : entry.key
         } else if entry.type == "Path" {
             editingKey = entry.key

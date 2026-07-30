@@ -4,9 +4,6 @@ import Foundation
 public struct MainMenuPage: View {
     let onSelect: (AppPage) -> Void
 
-    @State private var themeNames: [String] = ["dark", "light", "nord", "gruvbox", "dracula"]
-    @State private var themeIndex: Int = 0
-
     public init(onSelect: @escaping (AppPage) -> Void) {
         self.onSelect = onSelect
     }
@@ -85,8 +82,8 @@ public struct MainMenuPage: View {
         HStack(spacing: 2) {
             Text("Theme:")
                 .foregroundColor(theme.textDim)
-            Button(action: cycleTheme) {
-                Text(themeNames[themeIndex])
+            Button(action: { Task { await store.cycleTheme() } }) {
+                Text(store.configuration.theme)
                     .foregroundColor(theme.primary)
                     .bold()
             }
@@ -106,11 +103,6 @@ public struct MainMenuPage: View {
         }
         .padding(.horizontal)
         .padding(.vertical, 1)
-    }
-
-    private func cycleTheme() {
-        themeIndex = (themeIndex + 1) % themeNames.count
-        ThemeManager.activate(themeNames[themeIndex])
     }
 
     private func separatorLine(theme: ThemeColors) -> String {
