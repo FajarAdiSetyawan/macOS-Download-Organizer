@@ -361,6 +361,37 @@ public actor SQLiteDatabase {
         return records
     }
 
+    public func categoryStats() throws -> [(category: String, count: Int, totalSize: Int64)] {
+        let sql = """
+            SELECT category, COUNT(*) as total, SUM(fileSize) as totalSize
+            FROM history
+            WHERE status = 'moved'
+            GROUP BY category
+            ORDER BY total DESC;
+            """
+
+        var statement: OpaquePointer?
+
+        guard sqlite3_prepare_v2(db, sql, -1, &statement, nil) == SQLITE_OK else {
+            throw makeError("Failed to prepare categoryStats statement")
+        }
+
+        defer {
+            sqlite3_finalize(statement)
+        }
+
+        var result: [(category: String, count: Int, totalSize: Int64)] = []
+
+        while sqlite3_step(statement) == SQLITE_ROW {
+            let category = columnText(from: statement, index: 0)
+            let count = Int(sqlite3_column_int(statement, 1))
+            let totalSize = Int64(sqlite3_column_int64(statement, 2))
+            result.append((category, count, totalSize))
+        }
+
+        return result
+    }
+
     public func statistics() throws -> [String: Int] {
         let sql = """
             SELECT category, COUNT(*) as total

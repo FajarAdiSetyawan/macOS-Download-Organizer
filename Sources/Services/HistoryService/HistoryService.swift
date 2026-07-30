@@ -156,6 +156,22 @@ public actor HistoryService {
 
     // MARK: - Statistics
 
+    public func categoryStats() async -> [(category: String, count: Int, totalSize: Int64)] {
+        guard isOpen else {
+            return []
+        }
+
+        do {
+            return try await database.categoryStats()
+        } catch {
+            await AppLogger.shared.log(
+                .error,
+                "Failed to fetch category stats: \(error.localizedDescription)"
+            )
+            return []
+        }
+    }
+
     public func statistics() async -> [String: Int] {
         guard isOpen else {
             return [:]

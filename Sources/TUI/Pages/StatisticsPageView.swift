@@ -6,7 +6,6 @@ public struct StatisticsPageView: View {
     @ObservedObject var store: TUIStore = .shared
     @State private var showHelp = false
     @State private var catStats: [TUIStore.CatStat] = []
-    @State private var totalSize: Int64 = 0
 
     public init(onHome: @escaping () -> Void) {
         self.onHome = onHome
@@ -14,9 +13,7 @@ public struct StatisticsPageView: View {
 
     public var body: some View {
         let theme = ThemeManager.current
-        let totalFiles = catStats.reduce(0) { $0 + $1.count }
         let maxCount = catStats.map(\.count).max() ?? 1
-        let maxSize = catStats.map(\.totalSize).max() ?? 1
 
         Group {
             if showHelp {
@@ -24,20 +21,6 @@ public struct StatisticsPageView: View {
             } else {
                 VStack(alignment: .leading, spacing: 0) {
                     pageTitle("\(TUIIcon.stats) Statistics", theme: theme)
-
-                    Divider()
-                        .foregroundColor(theme.border)
-
-                    sectionTitle("Overview", theme: theme)
-
-                    HStack(spacing: 4) {
-                        statBox("\(totalFiles)", "Files", color: theme.highlight, theme: theme)
-                        statBox("\(catStats.count)", "Folders", color: theme.accent, theme: theme)
-                        statBox("\(store.movedToday)", "Today", color: theme.success, theme: theme)
-                        statBox(formatByte(totalSize), "Total Size", color: theme.primary, theme: theme)
-                    }
-                    .padding(.horizontal)
-                    .padding(.vertical, 1)
 
                     Divider()
                         .foregroundColor(theme.border)
@@ -50,7 +33,7 @@ public struct StatisticsPageView: View {
                         ScrollView {
                             VStack(alignment: .leading, spacing: 0) {
                                 ForEach(Array(catStats.enumerated()), id: \.offset) { _, cs in
-                                    folderRow(cs: cs, maxCount: maxCount, maxSize: maxSize, theme: theme)
+                                    folderRow(cs: cs, maxCount: maxCount, theme: theme)
                                     Divider()
                                         .foregroundColor(theme.border)
                                 }
@@ -79,25 +62,9 @@ public struct StatisticsPageView: View {
 
     private func loadStats() async {
         catStats = await store.detailedStatistics()
-        totalSize = catStats.reduce(0) { $0 + $1.totalSize }
     }
 
-    private func statBox(_ value: String, _ label: String, color: Color, theme: ThemeColors) -> some View {
-        VStack(alignment: .center, spacing: 0) {
-            Text(value)
-                .foregroundColor(color)
-                .bold()
-            Text(label)
-                .foregroundColor(theme.textDim)
-        }
-        .frame(minWidth: 10)
-        .padding(.horizontal, 3)
-        .padding(.vertical, 1)
-        .border(theme.border)
-    }
-
-    private func folderRow(cs: TUIStore.CatStat, maxCount: Int, maxSize: Int64, theme: ThemeColors) -> some View {
-        let pct = totalSize > 0 ? 100 * cs.totalSize / totalSize : 0
+private func folderRow(cs: TUIStore.CatStat, maxCount: Int, theme: ThemeColors) -> some View {
         let barLen = max(Double(cs.count) / Double(maxCount) * 25, cs.count > 0 ? 1 : 0)
         let bar = String(repeating: TUIIcon.bar, count: Int(barLen))
         let barColor: Color = {
