@@ -200,6 +200,11 @@ public final class TUIStore: ObservableObject, @unchecked Sendable {
         return "Undid \(undone) file(s)"
     }
 
+    public func deleteAllHistory() async {
+        await HistoryService.shared.deleteAll()
+        await refresh()
+    }
+
     public func backupAllData(to url: URL) async throws {
         try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
         let configSrc = Paths.configFile

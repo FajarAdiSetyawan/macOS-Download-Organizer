@@ -444,6 +444,10 @@ public actor SQLiteDatabase {
         return Int(sqlite3_column_int(statement, 0))
     }
 
+    public func deleteAll() throws {
+        try execute("DELETE FROM history;")
+    }
+
     // MARK: - Updates
 
     public func markRestored(id: UUID) throws {

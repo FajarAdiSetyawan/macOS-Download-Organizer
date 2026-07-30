@@ -6,6 +6,7 @@ public struct StatisticsPageView: View {
     @ObservedObject var store: TUIStore = .shared
     @State private var showHelp = false
     @State private var catStats: [TUIStore.CatStat] = []
+    @State private var confirmDelete = false
 
     public init(onHome: @escaping () -> Void) {
         self.onHome = onHome
@@ -44,11 +45,40 @@ public struct StatisticsPageView: View {
 
                     Spacer()
 
+                    if confirmDelete {
+                        HStack(spacing: 2) {
+                            Text("Delete all history?")
+                                .foregroundColor(theme.warning)
+                            Button(action: {
+                                Task { await store.deleteAllHistory() }
+                                confirmDelete = false
+                                catStats = []
+                            }) {
+                                Text("Yes")
+                                    .foregroundColor(theme.error)
+                                    .bold()
+                            }
+                            Button(action: { confirmDelete = false }) {
+                                Text("No")
+                                    .foregroundColor(theme.textDim)
+                            }
+                            Spacer()
+                        }
+                        .padding(.horizontal)
+                        Divider()
+                            .foregroundColor(theme.border)
+                    }
+
                     Divider()
                         .foregroundColor(theme.border)
 
                     HStack(spacing: 2) {
                         keyHint("R", "Refresh", theme: theme)
+                        Button(action: { confirmDelete = true }) {
+                            Text("Clear")
+                                .foregroundColor(theme.error)
+                                .bold()
+                        }
                         Spacer()
                         helpButton(theme: theme, action: { showHelp = true })
                         homeButton(theme: theme, action: onHome)
@@ -64,7 +94,7 @@ public struct StatisticsPageView: View {
         catStats = await store.detailedStatistics()
     }
 
-private func folderRow(cs: TUIStore.CatStat, maxCount: Int, theme: ThemeColors) -> some View {
+    private func folderRow(cs: TUIStore.CatStat, maxCount: Int, theme: ThemeColors) -> some View {
         let barLen = max(Double(cs.count) / Double(maxCount) * 25, cs.count > 0 ? 1 : 0)
         let bar = String(repeating: TUIIcon.bar, count: Int(barLen))
         let barColor: Color = {

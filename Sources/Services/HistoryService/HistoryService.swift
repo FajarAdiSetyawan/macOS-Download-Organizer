@@ -279,4 +279,14 @@ public actor HistoryService {
             return false
         }
     }
+
+    public func deleteAll() async {
+        guard isOpen else { return }
+        do {
+            try await database.deleteAll()
+            await AppLogger.shared.log(.info, "All history records deleted")
+        } catch {
+            await AppLogger.shared.log(.error, "Failed to delete history: \(error.localizedDescription)")
+        }
+    }
 }
