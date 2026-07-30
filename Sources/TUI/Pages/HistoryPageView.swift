@@ -62,23 +62,23 @@ public struct HistoryPageView: View {
                     Divider().foregroundColor(theme.border)
 
                     HStack(spacing: 1) {
-                        ForEach(["all", "moved", "restored", "failed"], id: \.self) { s in
+                        ForEach(["all", "moved", "restored", "failed"], id: \.self) { status in
                             Button(action: {
-                                statusFilter = s == "all" ? nil : s
+                                statusFilter = status == "all" ? nil : status
                                 selectedIndex = 0
                             }) {
-                                Text(s == "all" ? "All" : s)
-                                    .foregroundColor(statusFilter == (s == "all" ? nil : s) ? theme.highlight : theme.textDim)
-                                    .bold(statusFilter == (s == "all" ? nil : s))
+                                Text(status == "all" ? "All" : status)
+                                    .foregroundColor(statusFilter == (status == "all" ? nil : status) ? theme.highlight : theme.textDim)
+                                    .bold(statusFilter == (status == "all" ? nil : status))
                             }
-                            if s != "failed" { Text("|").foregroundColor(theme.textDim) }
+                            if status != "failed" { Text("|").foregroundColor(theme.textDim) }
                         }
                         Spacer()
-                        ForEach(SortBy.allCases, id: \.self) { s in
-                            Button(action: { sortBy = s; selectedIndex = 0 }) {
-                                Text(sortBy == s ? "\(TUIIcon.chevronDown) \(s.rawValue)" : s.rawValue)
-                                    .foregroundColor(sortBy == s ? theme.accent : theme.textDim)
-                                    .bold(sortBy == s)
+                        ForEach(SortBy.allCases, id: \.self) { sort in
+                            Button(action: { sortBy = sort; selectedIndex = 0 }) {
+                                Text(sortBy == sort ? "\(TUIIcon.chevronDown) \(sort.rawValue)" : sort.rawValue)
+                                    .foregroundColor(sortBy == sort ? theme.accent : theme.textDim)
+                                    .bold(sortBy == sort)
                             }
                         }
                     }
