@@ -143,7 +143,6 @@ public struct HistoryPageView: View {
                         Spacer()
                         Group {
                             helpButton(theme: theme, action: { showHelp = true })
-                            themeButton(theme: theme)
                             homeButton(theme: theme, action: onHome)
                         }
                     }

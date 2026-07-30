@@ -90,7 +90,6 @@ public struct AboutPageView: View {
             HStack(spacing: 2) {
                 Spacer()
                 helpButton(theme: theme, action: { showHelp = true })
-                themeButton(theme: theme)
                 homeButton(theme: theme)
             }
             .padding(.horizontal)

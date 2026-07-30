@@ -130,7 +130,6 @@ public struct DashboardPageView: View {
                     Text(store.autoRefresh ? "⏺" : "⏹")
                         .foregroundColor(store.autoRefresh ? theme.success : theme.error)
                 }
-                themeButton(theme: theme)
                 homeButton(theme: theme, action: onHome)
             }
             .padding(.horizontal)

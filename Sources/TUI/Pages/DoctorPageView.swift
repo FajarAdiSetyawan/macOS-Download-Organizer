@@ -69,7 +69,6 @@ public struct DoctorPageView: View {
                 keyHint("C", "Clear", theme: theme)
                 Spacer()
                 helpButton(theme: theme, action: { showHelp = true })
-                themeButton(theme: theme)
                 homeButton(theme: theme, action: onHome)
             }
             .padding(.horizontal)

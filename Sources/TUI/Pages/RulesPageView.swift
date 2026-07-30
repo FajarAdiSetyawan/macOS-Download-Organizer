@@ -138,7 +138,6 @@ public struct RulesPageView: View {
                 keyHint("R", "Refresh", theme: theme)
                 Spacer()
                 helpButton(theme: theme, action: { showHelp = true })
-                themeButton(theme: theme)
                 homeButton(theme: theme, action: onHome)
             }
             .padding(.horizontal)
