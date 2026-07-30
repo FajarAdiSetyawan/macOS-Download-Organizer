@@ -50,9 +50,11 @@ public struct StatisticsPageView: View {
                             Text("Delete all history?")
                                 .foregroundColor(theme.warning)
                             Button(action: {
-                                Task { await store.deleteAllHistory() }
-                                confirmDelete = false
-                                catStats = []
+                                Task {
+                                    await store.deleteAllHistory()
+                                    confirmDelete = false
+                                    await loadStats()
+                                }
                             }) {
                                 Text("Yes")
                                     .foregroundColor(theme.error)
