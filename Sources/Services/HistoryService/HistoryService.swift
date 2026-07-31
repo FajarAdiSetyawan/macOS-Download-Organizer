@@ -172,6 +172,22 @@ public actor HistoryService {
         }
     }
 
+    public func topFilesBySize(limit: Int) async -> [MoveRecord] {
+        guard isOpen else {
+            return []
+        }
+
+        do {
+            return try await database.topFilesBySize(limit: limit)
+        } catch {
+            await AppLogger.shared.log(
+                .error,
+                "Failed to fetch top files by size: \(error.localizedDescription)"
+            )
+            return []
+        }
+    }
+
     public func statistics() async -> [String: Int] {
         guard isOpen else {
             return [:]

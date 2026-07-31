@@ -323,6 +323,10 @@ public final class TUIStore: ObservableObject, @unchecked Sendable {
         }
     }
 
+    public func topFilesBySize(limit: Int = 10) async -> [MoveRecord] {
+        return await HistoryService.shared.topFilesBySize(limit: limit)
+    }
+
     public func addCustomRule(category: String, extensions: String) async {
         let list = extensions
             .split(separator: ",")

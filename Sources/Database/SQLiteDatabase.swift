@@ -392,6 +392,46 @@ public actor SQLiteDatabase {
         return result
     }
 
+    public func topFilesBySize(limit: Int) throws -> [MoveRecord] {
+        let sql = """
+            SELECT 
+                id,
+                filename,
+                originalPath,
+                destinationPath,
+                category,
+                extension,
+                fileSize,
+                createdAt,
+                movedAt,
+                status
+            FROM history
+            WHERE status = 'moved'
+            ORDER BY fileSize DESC
+            LIMIT ?;
+            """
+
+        var statement: OpaquePointer?
+
+        guard sqlite3_prepare_v2(db, sql, -1, &statement, nil) == SQLITE_OK else {
+            throw makeError("Failed to prepare topFilesBySize statement")
+        }
+
+        defer {
+            sqlite3_finalize(statement)
+        }
+
+        sqlite3_bind_int(statement, 1, Int32(limit))
+
+        var records: [MoveRecord] = []
+
+        while sqlite3_step(statement) == SQLITE_ROW {
+            records.append(readRecord(from: statement))
+        }
+
+        return records
+    }
+
     public func statistics() throws -> [String: Int] {
         let sql = """
             SELECT category, COUNT(*) as total

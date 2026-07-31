@@ -7,6 +7,7 @@ public struct StatisticsPageView: View {
     @State private var showHelp = false
     @State private var catStats: [TUIStore.CatStat] = []
     @State private var confirmDelete = false
+    @State private var topFiles: [MoveRecord] = []
 
     public init(onHome: @escaping () -> Void) {
         self.onHome = onHome
@@ -26,32 +27,57 @@ public struct StatisticsPageView: View {
                     Divider()
                         .foregroundColor(theme.border)
 
-                    sectionTitle("Top Categories", theme: theme)
+                    Group {
+                        sectionTitle("Top Categories", theme: theme)
 
-                    let topCategoriesList = Array(catStats.filter { $0.count > 0 }.sorted { $0.count > $1.count }.prefix(10))
-                    let maxCountInTop = topCategoriesList.map(\.count).max() ?? 1
+                        let topCategoriesList = Array(catStats.filter { $0.count > 0 }.sorted { $0.count > $1.count }.prefix(10))
+                        let maxCountInTop = topCategoriesList.map(\.count).max() ?? 1
 
-                    if topCategoriesList.isEmpty {
-                        HStack {
-                            Spacer()
-                            Text("No data yet.")
-                                .foregroundColor(theme.textDim)
-                            Spacer()
-                        }
-                        .padding(.vertical, 2)
-                    } else {
-                        VStack(alignment: .leading, spacing: 0) {
-                            ForEach(Array(topCategoriesList.enumerated()), id: \.offset) { index, categoryData in
-                                histogramRow(
-                                    rank: index + 1,
-                                    category: categoryData,
-                                    maxCount: maxCountInTop,
-                                    theme: theme
-                                )
+                        if topCategoriesList.isEmpty {
+                            HStack {
+                                Spacer()
+                                Text("No data yet.")
+                                    .foregroundColor(theme.textDim)
+                                Spacer()
                             }
+                            .padding(.vertical, 2)
+                        } else {
+                            VStack(alignment: .leading, spacing: 0) {
+                                ForEach(Array(topCategoriesList.enumerated()), id: \.offset) { index, categoryData in
+                                    histogramRow(
+                                        rank: index + 1,
+                                        category: categoryData,
+                                        maxCount: maxCountInTop,
+                                        theme: theme
+                                    )
+                                }
+                            }
+                            .padding(.horizontal)
+                            .padding(.vertical, 1)
                         }
-                        .padding(.horizontal)
-                        .padding(.vertical, 1)
+
+                        Divider()
+                            .foregroundColor(theme.border)
+
+                        sectionTitle("Top Files by Size", theme: theme)
+
+                        if topFiles.isEmpty {
+                            HStack {
+                                Spacer()
+                                Text("No data yet.")
+                                    .foregroundColor(theme.textDim)
+                                Spacer()
+                            }
+                            .padding(.vertical, 2)
+                        } else {
+                            VStack(alignment: .leading, spacing: 0) {
+                                ForEach(Array(topFiles.prefix(10).enumerated()), id: \.offset) { index, fileRecord in
+                                    topFileRow(rank: index + 1, record: fileRecord, theme: theme)
+                                }
+                            }
+                            .padding(.horizontal)
+                            .padding(.vertical, 1)
+                        }
                     }
 
                     Divider()
@@ -132,6 +158,39 @@ public struct StatisticsPageView: View {
 
     private func loadStats() async {
         catStats = await store.detailedStatistics()
+        topFiles = await store.topFilesBySize(limit: 10)
+    }
+
+    private func topFileRow(rank: Int, record: MoveRecord, theme: ThemeColors) -> some View {
+        let sizeColor: Color = {
+            if record.fileSize > 100_000_000 { return theme.error }
+            else if record.fileSize > 10_000_000 { return theme.warning }
+            else { return theme.primary }
+        }()
+        
+        return VStack(alignment: .leading, spacing: 0) {
+            HStack(spacing: 1) {
+                Text("\(rank).")
+                    .foregroundColor(theme.textDim)
+                Text(record.filename)
+                    .foregroundColor(theme.highlight)
+                    .bold(rank <= 3)
+                Spacer()
+                Text(formatByte(record.fileSize))
+                    .foregroundColor(sizeColor)
+                    .bold()
+            }
+            HStack(spacing: 1) {
+                Text("   ")
+                Text(TUIIcon.arrow)
+                    .foregroundColor(theme.accent)
+                Text(record.category)
+                    .foregroundColor(theme.success)
+                Text("  .\(record.fileExtension)")
+                    .foregroundColor(theme.textDim)
+            }
+        }
+        .padding(.vertical, 1)
     }
 
     private func histogramRow(rank: Int, category: TUIStore.CatStat, maxCount: Int, theme: ThemeColors) -> some View {
