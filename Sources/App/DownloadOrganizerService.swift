@@ -5,6 +5,7 @@ public final class DownloadOrganizerService: @unchecked Sendable {
     private var configWatcher: ConfigurationWatcher?
     private var rulesWatcher: ConfigurationWatcher?
     private var retryTask: Task<Void, Never>?
+    private var summaryTask: Task<Void, Never>?
     private let shutdownFlag: UnsafeMutablePointer<Bool>
 
     public init() {
@@ -35,6 +36,7 @@ public final class DownloadOrganizerService: @unchecked Sendable {
         await createDefaultFolders()
         await startWatchers()
         startRetryLoop()
+        startDailySummaryLoop()
         installSignalHandlers()
 
         await AppLogger.shared.log(.info, "Download Organizer started")
@@ -103,6 +105,45 @@ public final class DownloadOrganizerService: @unchecked Sendable {
                 try? await Task.sleep(for: .seconds(30))
                 await FileMover.shared.retryPending()
             }
+        }
+    }
+
+    private func startDailySummaryLoop() {
+        summaryTask = Task {
+            while !Task.isCancelled {
+                // Check every hour
+                try? await Task.sleep(for: .seconds(3600))
+                await checkAndSendDailySummary()
+            }
+        }
+    }
+
+    private func checkAndSendDailySummary() async {
+        let config = await ConfigurationManager.shared.current()
+        guard config.dailySummary && config.notifications else { return }
+        
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        let today = dateFormatter.string(from: Date())
+        
+        // Check if we already sent summary today
+        if config.lastSummaryDate == today {
+            return
+        }
+        
+        // Send summary
+        let stats = await HistoryService.shared.statistics()
+        let totalMoved = stats.values.reduce(0, +)
+        
+        await NotificationService.shared.sendSummary(movedCount: totalMoved, categories: stats)
+        
+        // Update last summary date
+        do {
+            try await ConfigurationManager.shared.update { configuration in
+                configuration.lastSummaryDate = today
+            }
+        } catch {
+            await AppLogger.shared.log(.error, "Failed to update lastSummaryDate: \(error.localizedDescription)")
         }
     }
 

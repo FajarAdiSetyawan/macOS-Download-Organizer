@@ -149,6 +149,7 @@ public final class TUIStore: ObservableObject, @unchecked Sendable {
         switch key {
         case "Enabled": c.enabled.toggle()
         case "Notifications": c.notifications.toggle()
+        case "Daily Summary": c.dailySummary.toggle()
         case "Auto-create Folders": c.autoCreateFolders.toggle()
         case "History": c.history.toggle()
         default: return
@@ -358,6 +359,7 @@ public final class TUIStore: ObservableObject, @unchecked Sendable {
             ConfigEntry(key: "Watch Folder", value: c.watchFolder, type: "Path"),
             ConfigEntry(key: "Delay", value: "\(Int(c.delay))s", type: "Seconds"),
             ConfigEntry(key: "Notifications", value: c.notifications ? "on" : "off", type: "Bool"),
+            ConfigEntry(key: "Daily Summary", value: c.dailySummary ? "on" : "off", type: "Bool"),
             ConfigEntry(key: "Auto-create Folders", value: c.autoCreateFolders ? "on" : "off", type: "Bool"),
             ConfigEntry(key: "Duplicate Strategy", value: "\(strategy.label) (\(strategy.description))", type: "Select"),
             ConfigEntry(key: "History", value: c.history ? "enabled" : "disabled", type: "Bool"),
