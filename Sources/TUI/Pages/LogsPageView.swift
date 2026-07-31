@@ -38,11 +38,11 @@ public struct LogsPageView: View {
             } else {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 0) {
-                        ForEach(Array(lines.enumerated()), id: \.offset) { index, line in
+                        ForEach(Array(lines.enumerated()), id: \.offset) { idx, logLine in
                             HStack(spacing: 1) {
-                                Text("\(index + 1)")
+                                Text("\(idx + 1)")
                                     .foregroundColor(theme.textDim)
-                                Text(line.isEmpty ? " " : line)
+                                Text(logLine.isEmpty ? " " : logLine)
                                     .foregroundColor(theme.textDim)
                                 Spacer()
                             }

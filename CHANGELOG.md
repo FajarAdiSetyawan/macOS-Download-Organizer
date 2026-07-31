@@ -1,5 +1,32 @@
 # Changelog
 
+## [1.1.3] - 2026-07-31
+
+### Fixed
+- Stray "s" character bug caused by wide Unicode icons (☰, ⚙, ✎, ↻) - replaced with safe ASCII alternatives
+- .dmg and .pkg files now correctly placed in Applications folder (previously went to Archives)
+- ForEach variable naming in LogsPageView to prevent release mode collision
+- Array conversion for `.suffix()` in log lines to prevent memory issues
+
+### Added
+- "Organize Now" button in main menu with feedback notification
+- Watch folder display in main menu (shows both primary and additional folders)
+- Organize completion notification (shows "Organized X file(s)" for 5 seconds)
+- Additional watch folder now displayed in main menu when configured
+
+### Changed
+- Simplified folder categories from 14 to 10:
+  - Fonts merged into Design
+  - Database, Config, and Certificates merged into Code
+- Removed Export/Import Config (kept only Backup/Restore for simplicity)
+- Icon consistency: replaced problematic Unicode characters with safe ASCII
+- Background color changed to `Color.trueColor(red: 32, green: 38, blue: 50)` for better contrast
+
+### Improved
+- Menu alignment and icon consistency across all screens
+- Better terminal compatibility by using single-width characters
+- Cleaner configuration page with fewer redundant options
+
 ## [1.1.2] - 2026-07-31
 
 ### Fixed

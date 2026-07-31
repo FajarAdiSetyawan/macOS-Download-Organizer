@@ -174,7 +174,7 @@ public actor RuleEngine {
 
         let archives: [String] = [
             "zip", "rar", "7z", "tar", "gz",
-            "xz", "bz2", "dmg", "iso", "cab",
+            "xz", "bz2", "iso", "cab",
             "arj", "lz", "lzh", "ace", "img",
             "bin", "cue", "mdf", "nrg", "toast",
             "zst", "zstd", "lz4", "jar", "war",
@@ -182,7 +182,7 @@ public actor RuleEngine {
         ]
 
         let applications: [String] = [
-            "app", "pkg", "exe", "msi", "apk",
+            "app", "pkg", "dmg", "exe", "msi", "apk",
             "aab", "ipa", "deb", "rpm", "appimage"
         ]
 
@@ -191,7 +191,14 @@ public actor RuleEngine {
             "lit", "lrf", "cbr", "cbz", "cbt"
         ]
 
-        let fonts: [String] = [
+        let design: [String] = [
+            "fig", "xd", "psd", "ai", "sketch",
+            "indd", "afdesign", "afphoto", "blend",
+            "c4d", "max", "fbx", "obj", "stl",
+            "dae", "3ds", "gltf", "glb", "usdz",
+            "dwg", "dxf", "igs", "iges", "step",
+            "stp", "skp", "eps", "ps",
+            "storyboard", "xib",
             "ttf", "otf", "woff", "woff2", "eot",
             "dfont", "fon", "ttc"
         ]
@@ -216,33 +223,14 @@ public actor RuleEngine {
             "el", "rkt", "groovy", "gvy", "gsh",
             "jl", "cr", "nim", "pony", "purs",
             "res", "ml", "mli", "v", "vb",
-            "asmx", "awk", "tcl", "coffee"
-        ]
-
-        let design: [String] = [
-            "fig", "xd", "psd", "ai", "sketch",
-            "indd", "afdesign", "afphoto", "blend",
-            "c4d", "max", "fbx", "obj", "stl",
-            "dae", "3ds", "gltf", "glb", "usdz",
-            "dwg", "dxf", "igs", "iges", "step",
-            "stp", "skp", "eps", "ps",
-            "storyboard", "xib"
-        ]
-
-        let database: [String] = [
+            "asmx", "awk", "tcl", "coffee",
             "sqlite", "sqlite3", "db", "db3",
-            "sql", "sqlitedb", "sdb", "frm",
-            "myd", "myi", "mdf", "ldf", "ndf"
-        ]
-
-        let config: [String] = [
+            "sqlitedb", "sdb", "frm",
+            "myd", "myi", "mdf", "ldf", "ndf",
             "plist", "strings", "xcconfig",
             "entitlements", "mobileprovision",
             "xcscheme", "xcworkspacedata",
-            "pbxproj", "xcsettings"
-        ]
-
-        let certificates: [String] = [
+            "pbxproj", "xcsettings",
             "cer", "crt", "pem", "key",
             "p12", "pfx", "der", "ca-bundle",
             "csr"
@@ -256,12 +244,8 @@ public actor RuleEngine {
         add(archives, to: &rules, category: .archives)
         add(applications, to: &rules, category: .applications)
         add(books, to: &rules, category: .books)
-        add(fonts, to: &rules, category: .fonts)
         add(code, to: &rules, category: .code)
         add(design, to: &rules, category: .design)
-        add(database, to: &rules, category: .database)
-        add(config, to: &rules, category: .config)
-        add(certificates, to: &rules, category: .certificates)
 
         return rules
     }

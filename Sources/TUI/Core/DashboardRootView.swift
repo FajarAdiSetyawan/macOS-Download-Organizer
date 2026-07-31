@@ -14,6 +14,7 @@ public struct DashboardRootView: View {
                 MainMenuPage(onSelect: { page in activePage = page })
             }
         }
+        .background(Color.trueColor(red: 32, green: 38, blue: 50))
         .onAppear {
             Task { @MainActor in
                 await TUIStore.shared.bootstrap()

@@ -6,9 +6,7 @@ public struct ConfigurationPageView: View {
     @ObservedObject var store: TUIStore = .shared
     @State private var editingKey: String? = nil
     @State private var browsing: Bool = false
-    @State private var importing: Bool = false
     @State private var restoring: Bool = false
-    @State private var confirmImportPath: String? = nil
     @State private var feedbackMessage: String? = nil
     @State private var showHelp = false
 
@@ -35,17 +33,6 @@ public struct ConfigurationPageView: View {
                     editingKey = nil
                 }
             )
-        } else if importing {
-            FolderBrowserView(
-                startPath: "~/Desktop",
-                onSelect: { path in
-                    importing = false
-                    confirmImportPath = path
-                },
-                onCancel: {
-                    importing = false
-                }
-            )
         } else if restoring {
             FolderBrowserView(
                 startPath: "~/Desktop",
@@ -69,35 +56,6 @@ public struct ConfigurationPageView: View {
                     Divider().foregroundColor(theme.border)
                 }
 
-                if let path = confirmImportPath {
-                    HStack(spacing: 2) {
-                        Text("Import config from this file?")
-                            .foregroundColor(theme.warning)
-                        Button(action: {
-                            Task {
-                                do {
-                                    try await store.importConfig(from: URL(fileURLWithPath: path))
-                                    feedbackMessage = "Config imported successfully"
-                                } catch {
-                                    feedbackMessage = "Import failed: \(error.localizedDescription)"
-                                }
-                                confirmImportPath = nil
-                            }
-                        }) {
-                            Text("Yes")
-                                .foregroundColor(theme.error)
-                                .bold()
-                        }
-                        Button(action: { confirmImportPath = nil }) {
-                            Text("No")
-                                .foregroundColor(theme.textDim)
-                        }
-                        Spacer()
-                    }
-                    .padding(.horizontal)
-                    Divider().foregroundColor(theme.border)
-                }
-
                 ScrollView {
                     VStack(spacing: 0) {
                         ForEach(entries, id: \.key) { entry in
@@ -112,25 +70,6 @@ public struct ConfigurationPageView: View {
                         .padding(.vertical, 1)
 
                     HStack(spacing: 2) {
-                        Button(action: exportConfig) {
-                            HStack(spacing: 1) {
-                                Text(TUIIcon.save)
-                                    .foregroundColor(theme.success)
-                                Text("Export")
-                                    .foregroundColor(theme.success)
-                                    .bold()
-                            }
-                        }
-                        Button(action: { importing = true }) {
-                            HStack(spacing: 1) {
-                                Text(TUIIcon.folder)
-                                    .foregroundColor(theme.primary)
-                                Text("Import")
-                                    .foregroundColor(theme.primary)
-                                    .bold()
-                            }
-                        }
-                        Spacer()
                         Button(action: backupAll) {
                             HStack(spacing: 1) {
                                 Text(TUIIcon.save)
@@ -149,6 +88,7 @@ public struct ConfigurationPageView: View {
                                     .bold()
                             }
                         }
+                        Spacer()
                     }
                     .padding(.horizontal)
 
@@ -272,18 +212,13 @@ public struct ConfigurationPageView: View {
                         Text(entry.value)
                             .foregroundColor(editingKey == entry.key ? theme.accent : theme.highlight)
                             .bold()
-                        Text(entry.type)
-                            .foregroundColor(theme.textDim)
                         if entry.type == "Bool" {
                             Text(TUIIcon.edit).foregroundColor(theme.accent)
                         }
                         if entry.type == "Path" {
                             Text(TUIIcon.folder).foregroundColor(theme.textDim)
                         }
-                        if entry.type == "Select" {
-                            Text(TUIIcon.refresh).foregroundColor(theme.primary)
-                        }
-                        if entry.type == "Theme" {
+                        if entry.type == "Select" || entry.type == "Theme" {
                             Text(TUIIcon.refresh).foregroundColor(theme.primary)
                         }
                     }
@@ -330,20 +265,6 @@ public struct ConfigurationPageView: View {
                 feedbackMessage = "Restore completed from \(path)"
             } catch {
                 feedbackMessage = "Restore failed: \(error.localizedDescription)"
-            }
-        }
-    }
-
-    private func exportConfig() {
-        Task {
-            let desktop = FileManager.default.homeDirectoryForCurrentUser
-                .appendingPathComponent("Desktop")
-            let url = desktop.appendingPathComponent("download-organizer-config.json")
-            do {
-                try await store.exportConfig(to: url)
-                feedbackMessage = "Exported to Desktop"
-            } catch {
-                feedbackMessage = "Export failed: \(error.localizedDescription)"
             }
         }
     }

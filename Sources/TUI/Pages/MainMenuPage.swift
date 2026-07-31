@@ -9,6 +9,7 @@ public struct MainMenuPage: View {
     }
 
     @ObservedObject private var store: TUIStore = .shared
+    @State private var organizeFeedback: String? = nil
 
     public var body: some View {
         let theme = ThemeManager.current
@@ -16,7 +17,7 @@ public struct MainMenuPage: View {
         VStack(spacing: 0) {
             VStack(spacing: 0) {
                 logoView(asciiLogo, theme: theme)
-                Text("Download Organizer  v1.1.2")
+                Text("Download Organizer  v1.1.3")
                     .foregroundColor(theme.highlight)
                     .bold()
                 Text("Native Swift 6  •  macOS 14+")
@@ -24,23 +25,58 @@ public struct MainMenuPage: View {
             }
 
             statusBar(store: store, theme: theme)
+            
+            watchFolderInfo(store: store, theme: theme)
+            
+            if let feedback = organizeFeedback {
+                HStack(spacing: 2) {
+                    Text(feedback)
+                        .foregroundColor(theme.success)
+                        .bold()
+                    Spacer()
+                }
+                .padding(.horizontal)
+                .padding(.vertical, 1)
+            }
 
             Divider()
                 .foregroundColor(theme.border)
 
             ScrollView {
                 VStack(spacing: 0) {
-                    ForEach(AppPage.allCases, id: \.self) { page in
-                        Button(action: { onSelect(page) }) {
+                    ForEach(AppPage.allCases, id: \.self) { menuPage in
+                        Button(action: { onSelect(menuPage) }) {
                             HStack(spacing: 2) {
-                                Text(page.icon)
+                                Text(menuPage.icon)
                                     .foregroundColor(theme.primary)
-                                Text(page.title)
+                                Text(menuPage.title)
                                     .foregroundColor(theme.textDim)
                                 Spacer()
                             }
                             .padding(.horizontal)
                         }
+                    }
+                    Text(separatorLine(theme: theme))
+                        .foregroundColor(theme.textDim)
+                        .padding(.horizontal)
+                    Button(action: {
+                        Task { 
+                            let result = await store.organizeNow()
+                            await store.refresh()
+                            organizeFeedback = result
+                            try? await Task.sleep(for: .seconds(5))
+                            organizeFeedback = nil
+                        }
+                    }) {
+                        HStack(spacing: 2) {
+                            Text(TUIIcon.refresh)
+                                .foregroundColor(theme.success)
+                            Text("Organize Now")
+                                .foregroundColor(theme.success)
+                                .bold()
+                            Spacer()
+                        }
+                        .padding(.horizontal)
                     }
                     Text(separatorLine(theme: theme))
                         .foregroundColor(theme.textDim)
@@ -103,6 +139,31 @@ public struct MainMenuPage: View {
         }
         .padding(.horizontal)
         .padding(.vertical, 1)
+    }
+    
+    private func watchFolderInfo(store: TUIStore, theme: ThemeColors) -> some View {
+        VStack(spacing: 0) {
+            HStack(spacing: 2) {
+                Text("Watching:")
+                    .foregroundColor(theme.textDim)
+                Text(store.configuration.watchFolder)
+                    .foregroundColor(theme.primary)
+                Spacer()
+            }
+            .padding(.horizontal)
+            .padding(.vertical, 1)
+            
+            if let additional = store.configuration.additionalWatchFolder, !additional.isEmpty {
+                HStack(spacing: 2) {
+                    Text("Additional:")
+                        .foregroundColor(theme.textDim)
+                    Text(additional)
+                        .foregroundColor(theme.primary)
+                    Spacer()
+                }
+                .padding(.horizontal)
+            }
+        }
     }
 
     private func separatorLine(theme: ThemeColors) -> String {

@@ -123,10 +123,10 @@ public final class TUIStore: ObservableObject, @unchecked Sendable {
             return
         }
 
-        logLines = content
+        logLines = Array(content
             .components(separatedBy: .newlines)
             .filter { !$0.isEmpty }
-            .suffix(200)
+            .suffix(200))
     }
 
     public func runDoctorChecks() async {

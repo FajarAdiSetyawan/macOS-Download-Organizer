@@ -7,7 +7,8 @@ struct Main {
         let arguments = CommandLine.arguments
 
         if arguments.contains("dashboard") || arguments.contains("--dashboard") {
-            // Panggil langsung tanpa await MainActor.run
+            print("\u{001B}[2J\u{001B}[3J\u{001B}[H", terminator: "")
+            fflush(stdout)
             Application(rootView: DashboardRootView()).start()
             return
         }

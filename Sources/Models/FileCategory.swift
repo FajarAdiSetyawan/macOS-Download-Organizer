@@ -9,11 +9,7 @@ public enum FileCategory: String, Codable, CaseIterable, Sendable {
     case archives = "Archives"
     case applications = "Applications"
     case books = "Books"
-    case fonts = "Fonts"
     case code = "Code"
     case design = "Design"
-    case database = "Database"
-    case config = "Config"
-    case certificates = "Certificates"
     case others = "Others"
 }
