@@ -1,5 +1,25 @@
 # Changelog
 
+## [1.1.2] - 2026-07-31
+
+### Fixed
+- Stray "s" character in production release — variable name collision in ForEach closures
+
+### Added
+- Save theme preference to config (persists across restarts)
+- macOS notifications when files are organized
+- Daily summary notification (once per day, toggleable)
+- Statistics: Top 10 categories with ASCII histogram/bar chart
+- Statistics: Top 10 largest files ever organized with size color-coding
+- Additional watch folder support (optional secondary folder)
+- Theme selector in Configuration page
+- Daily Summary toggle in Configuration page
+
+### Changed
+- Statistics page redesigned with 3 sections: Top Categories, Top Files, Per Folder
+- Configuration page now shows all settings including Theme and Daily Summary
+- Folder browser handles both Watch Folder and Additional Folder
+
 ## [1.1.1] - 2026-07-30
 
 ### Fixed

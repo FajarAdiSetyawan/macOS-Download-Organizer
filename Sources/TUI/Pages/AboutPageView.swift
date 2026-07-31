@@ -37,7 +37,7 @@ public struct AboutPageView: View {
                     .foregroundColor(theme.highlight)
                     .bold()
 
-                Text("Version 1.1.1")
+                Text("Version 1.1.2")
                     .foregroundColor(theme.textDim)
 
                 Spacer().frame(height: 1)
