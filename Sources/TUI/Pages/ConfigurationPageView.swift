@@ -24,9 +24,9 @@ public struct ConfigurationPageView: View {
             helpOverlay(theme: theme, onClose: { showHelp = false })
         } else if browsing {
             FolderBrowserView(
-                startPath: store.configuration.watchFolder,
+                startPath: editingKey == "Watch Folder" ? store.configuration.watchFolder : (store.configuration.additionalWatchFolder ?? "~/Desktop"),
                 onSelect: { path in
-                    Task { await store.updateConfig("Watch Folder", value: path) }
+                    Task { await store.updateConfig(editingKey ?? "", value: path) }
                     browsing = false
                     editingKey = nil
                 },

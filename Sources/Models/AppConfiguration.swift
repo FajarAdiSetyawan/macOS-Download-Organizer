@@ -25,6 +25,7 @@ public enum DuplicateStrategy: String, Codable, CaseIterable, Sendable {
 public struct AppConfiguration: Codable, Sendable {
     public var enabled: Bool
     public var watchFolder: String
+    public var additionalWatchFolder: String?
     public var delay: TimeInterval
     public var notifications: Bool
     public var autoCreateFolders: Bool
@@ -37,6 +38,7 @@ public struct AppConfiguration: Codable, Sendable {
     public init(
         enabled: Bool,
         watchFolder: String,
+        additionalWatchFolder: String? = nil,
         delay: TimeInterval,
         notifications: Bool,
         autoCreateFolders: Bool,
@@ -48,6 +50,7 @@ public struct AppConfiguration: Codable, Sendable {
     ) {
         self.enabled = enabled
         self.watchFolder = watchFolder
+        self.additionalWatchFolder = additionalWatchFolder
         self.delay = delay
         self.notifications = notifications
         self.autoCreateFolders = autoCreateFolders
@@ -65,6 +68,7 @@ public struct AppConfiguration: Codable, Sendable {
     public static let `default` = AppConfiguration(
         enabled: true,
         watchFolder: "~/Downloads",
+        additionalWatchFolder: nil,
         delay: 3,
         notifications: true,
         autoCreateFolders: true,

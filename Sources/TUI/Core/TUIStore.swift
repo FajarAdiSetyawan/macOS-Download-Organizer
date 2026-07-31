@@ -161,6 +161,7 @@ public final class TUIStore: ObservableObject, @unchecked Sendable {
         var c = configuration
         switch key {
         case "Watch Folder": c.watchFolder = value
+        case "Additional Folder": c.additionalWatchFolder = value.isEmpty ? nil : value
         case "Delay":
             let sanitized = value
                 .filter { $0.isNumber || $0 == "." }
@@ -357,6 +358,7 @@ public final class TUIStore: ObservableObject, @unchecked Sendable {
         return [
             ConfigEntry(key: "Enabled", value: c.enabled ? "true" : "false", type: "Bool"),
             ConfigEntry(key: "Watch Folder", value: c.watchFolder, type: "Path"),
+            ConfigEntry(key: "Additional Folder", value: c.additionalWatchFolder ?? "not set", type: "Path"),
             ConfigEntry(key: "Delay", value: "\(Int(c.delay))s", type: "Seconds"),
             ConfigEntry(key: "Notifications", value: c.notifications ? "on" : "off", type: "Bool"),
             ConfigEntry(key: "Daily Summary", value: c.dailySummary ? "on" : "off", type: "Bool"),

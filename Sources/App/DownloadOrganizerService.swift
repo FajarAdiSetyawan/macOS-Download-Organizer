@@ -2,6 +2,7 @@ import Foundation
 
 public final class DownloadOrganizerService: @unchecked Sendable {
     private var fileWatcher: FSEventsWatcher?
+    private var additionalFileWatcher: FSEventsWatcher?
     private var configWatcher: ConfigurationWatcher?
     private var rulesWatcher: ConfigurationWatcher?
     private var retryTask: Task<Void, Never>?
@@ -59,6 +60,18 @@ public final class DownloadOrganizerService: @unchecked Sendable {
             }
         }
         fileWatcher?.start()
+
+        // Start additional watcher if configured
+        if let additionalFolder = config.additionalWatchFolder, !additionalFolder.isEmpty {
+            let additionalPath = Paths.expandingTilde(additionalFolder)
+            additionalFileWatcher = FSEventsWatcher(path: additionalPath) { url in
+                Task {
+                    await FileMover.shared.enqueue(url)
+                }
+            }
+            additionalFileWatcher?.start()
+            await AppLogger.shared.log(.info, "Watching additional folder: \(additionalFolder)")
+        }
 
         configWatcher = ConfigurationWatcher(url: Paths.configFile) {
             Task {
