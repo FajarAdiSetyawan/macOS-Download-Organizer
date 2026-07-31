@@ -2,7 +2,7 @@ class DownloadOrganizer < Formula
   desc "Automatically organize your Downloads folder by file type"
   homepage "https://github.com/fajaradisetyawan/download-organizer"
   url "https://github.com/FajarAdiSetyawan/macOS-Download-Organizer/archive/refs/tags/v1.1.2.tar.gz"
-  sha256 "PLACEHOLDER"
+  sha256 "6a103d8ca9f109ae17655375899fd5a0afa3a070308b1292dfd71ab678dc9453"
   license "MIT"
   version "1.1.2"
 
